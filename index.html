@@ -125,19 +125,31 @@
             const saved = localStorage.getItem('nyankoHighPrice');
             if (saved) document.getElementById('highPrice').value = saved;
         });
+
         function calculate() {
             let h = parseFloat(document.getElementById('highPrice').value);
             let c = parseFloat(document.getElementById('currentPrice').value);
             let m = parseFloat(document.getElementById('multiplier').value);
             let res = document.getElementById('resultOutput');
+
             if (!h || !c) { res.innerHTML = "<span style='color:#c05621'>価格を入力してください 😿</span>"; return; }
             localStorage.setItem('nyankoHighPrice', h);
+
             let drop = ((h - c) / h) * 100;
             let N = Math.floor(drop);
             let units = (N - 1) * m;
-            if (drop < 0) { res.innerHTML = "🎉 新高値更新中！"; }
-            else if (N < 1) { res.innerHTML = `<div>📉 下落率 ${drop.toFixed(1)}% (N=${N})</div><div style='color:#718096; font-size:1.5rem; margin-top:5px;'>まだ待機！</div>`; }
-            else { res.innerHTML = `<div style='color:var(--nyanko-red); font-size:1.5rem;'>🚨 GO! (下落 ${drop.toFixed(1)}%)</div><div class='result-main'>注文数：${units > 0 ? units : 0} 口</div>`; }
+
+            // ▼ ロジック修正箇所 ▼
+            if (drop < 0) {
+                res.innerHTML = "🎉 新高値更新中！";
+            }
+            else if (units <= 0) { // 注文数が0口以下なら、GOを出さずに待機
+                // 修正： (N=...) の表示を削除しました
+                res.innerHTML = `<div>📉 下落率 ${drop.toFixed(1)}%</div><div style='color:#718096; font-size:1.5rem; margin-top:5px;'>まだ待機！</div>`;
+            }
+            else { // 注文数が1口以上ならGO!
+                res.innerHTML = `<div style='color:var(--nyanko-red); font-size:1.5rem;'>🚨 GO! (下落 ${drop.toFixed(1)}%)</div><div class='result-main'>注文数：${units} 口</div>`;
+            }
         }
     </script>
 </body>
