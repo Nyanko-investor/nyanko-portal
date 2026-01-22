@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>年間計画 ＆ 野望</title>
+    <style>
+        :root {
+            --nyanko-navy: #1a253a;
+            --nyanko-blue: #2c5282;
+            --nyanko-gold: #c05621;
+            --nyanko-red: #e53e3e;
+            --nyanko-gray: #f7fafc;
+            --text-main: #2d3748;
+            --border-color: #e2e8f0;
+            --header-bg: #1a253a;
+            /* Quest Colors (invest.htmlから移植) */
+            --quest-green: #059669; --quest-cyan: #0891b2; --quest-blue: #2563eb; --quest-purple: #7c3aed; --quest-god: #d97706;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.8;
+            color: var(--text-main);
+            background-color: #edf2f7;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 50px;
+        }
+
+        /* ヘッダー */
+        header {
+            background: var(--header-bg);
+            color: #fff;
+            padding: 50px 20px 40px;
+            text-align: center;
+        }
+
+        .confidential {
+            font-size: 0.85rem;
+            letter-spacing: 0.3em;
+            opacity: 0.8;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .header-main-title {
+            font-size: 1.8rem;
+            margin: 0;
+            line-height: 1.4;
+            font-weight: bold;
+        }
+
+        .header-sub-title {
+            font-size: 1rem;
+            margin-top: 20px;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+        /* ナビゲーション */
+        nav {
+            background: var(--header-bg);
+            padding: 15px 10px;
+            border-top: 4px solid var(--nyanko-gold);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            background: #2d3748;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .nav-btn span { margin-right: 6px; }
+        .nav-btn.active { background: var(--nyanko-gold); }
+
+        /* コンテンツエリア */
+        main { padding: 40px 50px; }
+        h2 { color: var(--nyanko-navy); border-bottom: 2px solid var(--nyanko-blue); padding-bottom: 10px; margin-top: 50px; font-size: 1.6rem; letter-spacing: 0.05em; }
+        
+        /* タイムラインスタイル */
+        .roadmap-container {
+            position: relative;
+            padding-left: 20px;
+            margin-top: 30px;
+            margin-bottom: 60px; /* 下にQUESTが来るので余白追加 */
+        }
+        
+        .roadmap-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 6px;
+            width: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+
+        .roadmap-item {
+            position: relative;
+            margin-bottom: 40px;
+            padding-left: 30px;
+        }
+
+        .roadmap-item::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--nyanko-gold);
+            border: 4px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+
+        .roadmap-month {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--nyanko-navy);
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .month-sub {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: #718096;
+            margin-left: 10px;
+            background: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .action-box {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .action-title {
+            font-weight: bold;
+            color: var(--nyanko-blue);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+            border-bottom: 1px dashed #cbd5e0;
+            padding-bottom: 5px;
+        }
+
+        .action-detail {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        
+        .action-detail:last-child { margin-bottom: 0; }
+
+        /* ハイライト用 */
+        .highlight-red { color: var(--nyanko-red); font-weight: bold; }
+        .highlight-gold { color: var(--nyanko-gold); font-weight: bold; }
+
+        /* Quest Card (invest.htmlから完全移植) */
+        .quest-section { margin-top: 60px; }
+        .quest-card { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 30px; overflow: hidden; background: #fff; box-shadow: 0 6px 12px rgba(0,0,0,0.05); }
+        .quest-header { padding: 15px 20px; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .q-green { background-color: var(--quest-green); border-left: 8px solid #047857; }
+        .q-cyan { background-color: var(--quest-cyan); border-left: 8px solid #0e7490; }
+        .q-blue { background-color: var(--quest-blue); border-left: 8px solid #1d4ed8; }
+        .q-purple { background-color: var(--quest-purple); border-left: 8px solid #6d28d9; }
+        .q-god { background: linear-gradient(90deg, #d97706, #f59e0b); border-left: 8px solid #b45309; }
+        .quest-body { padding: 25px; }
+        .quest-highlight { font-weight: bold; color: var(--nyanko-navy); background: #eef2ff; padding: 2px 6px; border-radius: 4px; }
+        .badge-now { background-color: var(--quest-green); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold; margin-right: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .quest-range { font-size: 0.9em; opacity: 0.95; font-family: monospace; }
+
+        /* 結論ボックス */
+        .conclusion {
+            background: linear-gradient(135deg, #1a253a 0%, #2c5282 100%);
+            color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            margin-top: 60px;
+            text-align: center;
+            border: 4px solid var(--nyanko-gold);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .conclusion h2 {
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            margin-top: 0;
+        }
+
+        .big-goal {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fbd38d;
+            margin: 30px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.05em;
+            line-height: 1.3;
+        }
+
+        .strategy-summary {
+            text-align: left;
+            display: inline-block;
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .strategy-row {
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+        }
+
+        /* 共通リストスタイル */
+        ul { padding-left: 25px; margin: 15px 0; }
+        li { margin-bottom: 12px; }
+
+        footer { text-align: center; padding: 40px 20px; background: var(--nyanko-navy); color: #fff; border-top: 6px solid var(--nyanko-gold); }
+
+        @media (max-width: 600px) {
+            main { padding: 30px 20px; }
+            .header-main-title { font-size: 1.4rem; }
+            .nav-btn { width: 45%; justify-content: center; font-size: 0.8rem; }
+            .roadmap-container { padding-left: 15px; }
+            .roadmap-item { padding-left: 20px; }
+            .big-goal { font-size: 1.6rem; }
+            .quest-header { flex-direction: column; align-items: flex-start; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <span class="confidential">CONFIDENTIAL DOCUMENT</span>
+            <div class="header-main-title">
+                ニャンコ・ホールディングス<br>グランド・マスタープラン 2026
+            </div>
+            <p class="header-sub-title">〜 年間計画＆ロードマップ 〜</p>
+        </header>
+
+        <nav>
+            <a href="index.html" class="nav-btn"><span>💻</span>ポータルへ</a>
+            <a href="philosophy.html" class="nav-btn"><span>🏠</span>理念・税金</a>
+            <a href="invest.html" class="nav-btn"><span>📈</span>投資</a>
+            <a href="roadmap.html" class="nav-btn active"><span>📅</span>ロードマップ</a>
+        </nav>
+
+        <main>
+            <h2>第6章：年間計画</h2>
+            <p style="margin-bottom:30px; font-size:0.95rem; color:#4a5568;">
+                季節ごとのイベント（決算、税務、優待）を制する者が、資産形成を制する。<br>
+                以下は、ニャンコ・ホールディングスが毎年繰り返すべき「勝利のサイクル」である。
+            </p>
+
+            <div class="roadmap-container">
+                
+                <div class="roadmap-item">
+                    <div class="roadmap-month">毎月 <span class="month-sub">Routine Work</span></div>
+                    <div class="action-box">
+                        <span class="action-title">💰 資金循環とリバランス</span>
+                        <div class="action-detail">
+                            ✅ <strong>セーフティ共済積立：</strong> 月額20万円（経費）を確実に積み立てる。
+                        </div>
+                        <div class="action-detail">
+                            ✅ <strong>NASDAQリバランス：</strong> 毎月15日、余剰資金を第1部隊へ移動し、「株60:現40」の比率を調整する。
+                        </div>
+                        <div class="action-detail">
+                            ✅ <strong>Time Machine発動判定：</strong> もし給料日前に暴落があれば、迷わず信用買い（給料前借りアタック）を行う。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-month">12月 <span class="month-sub">Defense & Tax</span></div>
+                    <div class="action-box" style="border-left: 4px solid var(--nyanko-red);">
+                        <span class="action-title">🛡️ 決算対策 ＆ 損出しリレー</span>
+                        <div class="action-detail">
+                            ✅ <strong>共済「年払い」発動：</strong> その年の事業利益を確認。必要なら向こう1年分（240万円）を一括払いし、経費を最大化する。
+                        </div>
+                        <div class="action-detail">
+                            ✅ <strong>損出しリレー（必須）：</strong> 特定口座の含み損がある場合、「1545」を売却し、即座に「2631」へ乗り換える。これにより税金を取り戻す。
+                        </div>
+                        <div class="action-detail">
+                            ✅ <strong>子供の益出し：</strong> 子供口座にて、基礎控除（48万円）の範囲内で利益確定し、無税で取得単価を引き上げる。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-month">1月 <span class="month-sub">New NISA & Offense</span></div>
+                    <div class="action-box" style="border-left: 4px solid var(--nyanko-blue);">
+                        <span class="action-title">🚀 資産洗浄（NISA移管）</span>
+                        <div class="action-detail">
+                            ✅ <strong>ブリッジ購入：</strong> 新NISA枠（240万円）を最速で埋める。
+                        </div>
+                        <div class="action-detail">
+                            <span style="font-size:0.85rem; background:#edf2f7; padding:5px; display:block; margin-top:5px;">
+                                <strong>手順：</strong> 手元現金（第2部隊）でNISA投信（eMAXIS Slim）を購入し、<span class="highlight-red">同日に</span>特定口座の「2631」を同額売却する。<br>
+                                これにより「ノーポジション（投資していない時間）」をゼロにしつつ、資金を非課税口座へ完全移管する。
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-month">2月〜3月 <span class="month-sub">Tax Return & Cross</span></div>
+                    <div class="action-box">
+                        <span class="action-title">⚖️ 確定申告 ＆ 錬金術発動</span>
+                        <div class="action-detail">
+                            ✅ <strong>確定申告 (Phase 3)：</strong> 給与所得と事業所得（共済で作った赤字）を損益通算。還付金を確定させる。
+                        </div>
+                        <div class="action-detail">
+                            ✅ <strong>第3部隊召喚 (Phase 4)：</strong> 共済の契約者貸付（年利0.9%）を利用し、積立金の95%を引き出す。
+                        </div>
+                        <div class="action-detail">
+                            ✅ <strong>3月優待クロス：</strong> 借りた資金をフル活用し、手数料（経費）だけで大量の「食料・QUOカード」をゲットする。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-month">4月 <span class="month-sub">Bonus Time</span></div>
+                    <div class="action-box" style="background:#fffaf0; border-color:#ed8936;">
+                        <span class="action-title">💰 還付金着金 ＆ プール</span>
+                        <div class="action-detail">
+                            ✅ <strong>着金確認：</strong> 税務署から<span class="highlight-gold">約100万円の還付金</span>が振り込まれる（予定）。
+                        </div>
+                        <div class="action-detail">
+                            ✅ <strong>第2部隊へ配備：</strong> この現金はすぐに使わず、「第2部隊（待機資金）」として証券口座へプールする。次の暴落やリバランスの原資となる。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-month">9月 <span class="month-sub">Cross Trading</span></div>
+                    <div class="action-box">
+                        <span class="action-title">🎁 秋の収穫祭</span>
+                        <div class="action-detail">
+                            ✅ <strong>9月優待クロス：</strong> 再び共済借入枠などを活用し、9月権利確定の優待（お米など）を確保する。生活費を徹底的に圧縮する。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="quest-section">
+                <h2>第7章：【野望】ロードマップ「QUEST TO GOD」</h2>
+                <p>資産レベル（Lv.1＝100万円）に応じた「買い方（ギアチェンジ）」の定義。</p>
+
+                <div class="quest-card">
+                    <div class="quest-header q-green">
+                        <span>🌱 基礎固め編 (Lv.1〜99)</span>
+                        <span class="quest-range">〜9,999万円</span>
+                    </div>
+                    <div class="quest-body">
+                        <div><span class="badge-now">NOW</span> <strong>Lv.43 (4,300万円) ➡ アッパーマス助走中</strong></div>
+                        <ul style="margin-top:10px;">
+                            <li><strong>心構え：</strong> 5,000万を超えても生活レベルを上げず、入金力を維持。</li>
+                            <li><strong>買い方：</strong> <span class="quest-highlight">N-1 × 1倍（等倍）</span>。焦って倍率を上げない。コツコツが最強。</li>
+                            <li><strong>ルール：</strong> ノーセル・リバランス。絶対に売らない。1億円の壁は「入金」で突破せよ。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="quest-card">
+                    <div class="quest-header q-cyan">
+                        <span>💎 富裕層編 (Lv.100〜199)</span>
+                        <span class="quest-range">1億〜1.9億円</span>
+                    </div>
+                    <div class="quest-body">
+                        <p><strong>真の「億り人」へ。桁が変わる瞬間。</strong></p>
+                        <ul>
+                            <li><strong>買い方：</strong> <span class="quest-highlight">N-1 × 1倍（等倍）</span>。</li>
+                            <li><strong>注意点：</strong> 慢心せず、基礎のフォームを崩さない時期。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="quest-card">
+                    <div class="quest-header q-blue">
+                        <span>🚀 覚醒・加速編 (Lv.200〜499)</span>
+                        <span class="quest-range">2億〜4.9億円</span>
+                    </div>
+                    <div class="quest-body">
+                        <ul>
+                            <li><strong>買い方：</strong> <span class="quest-highlight">億の位 ＝ 倍率 (×2〜4倍)</span>。資産の厚みを活かしてギアを上げる。</li>
+                            <li><strong>収穫ルール：</strong> 現金比率が <span style="color:var(--nyanko-red); font-weight:bold;">30%未満</span> になったら、35%まで売却して戻す。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="quest-card">
+                    <div class="quest-header q-purple">
+                        <span>🏰 帝王編 (Lv.500〜999)</span>
+                        <span class="quest-range">5億〜9.9億円</span>
+                    </div>
+                    <div class="quest-body">
+                        <ul>
+                            <li><strong>買い方：</strong> <span class="quest-highlight">×5倍 〜 ×9倍</span>。クリック一つで軽自動車1台分を買う。</li>
+                            <li><strong>ルール：</strong> 「売り」の完全解禁。35%ルールを徹底し、余剰資金を次の暴落に備える。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="quest-card">
+                    <div class="quest-header q-god">
+                        <span>🌞 神話編 (Lv.1000〜)</span>
+                        <span class="quest-range">10億円〜</span>
+                    </div>
+                    <div class="quest-body">
+                        <strong style="color:var(--quest-god); font-size:1.2rem;">GOD ニャンコ神</strong>
+                        <ul style="margin-top:10px;">
+                            <li><strong>買い方：</strong> <span class="quest-highlight">×10倍 〜</span>。暴落時はベンツ1台分を躊躇なく投入。</li>
+                            <li><strong>使命：</strong> 王朝の維持。労働は「趣味」。資産防衛が最優先ミッション。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <div class="conclusion">
+                <h2>🏆 結論：ニャンコ・ホールディングスの未来</h2>
+                
+                <div class="strategy-summary">
+                    <div class="strategy-row">✅ <strong>スピード勝負</strong>なら ➡ 信用取引（Time Machine）</div>
+                    <div class="strategy-row">✅ <strong>長期・計画戦</strong>なら ➡ 共済借入（第3部隊）</div>
+                    <div class="strategy-row">✅ <strong>税金対策</strong>なら ➡ 損出し＆事業経費のフル活用</div>
+                    <div class="strategy-row">✅ <strong>出口戦略</strong>なら ➡ ブリッジ購入でNISAへ移管</div>
+                </div>
+
+                <p style="font-size:1.1rem; line-height:1.8;">
+                    「税務署を財布にし、共済を銀行にし、市場の暴落を飯の種にする」。<br>
+                    この完全なる循環システムの先に待つのは…
+                </p>
+
+                <div class="big-goal">
+                    目指せ資産10億円！<br>
+                    QUEST TO GOD
+                </div>
+
+                <h3 style="margin-top:30px; font-size:1.5rem;">総員、作戦開始！ 🚀</h3>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Nyanko Holdings. All Rights Reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

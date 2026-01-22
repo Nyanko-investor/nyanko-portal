@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投資戦略</title>
+    <style>
+        :root {
+            --nyanko-navy: #1a253a;
+            --nyanko-blue: #2c5282;
+            --nyanko-gold: #c05621;
+            --nyanko-red: #e53e3e;
+            --nyanko-gray: #f7fafc;
+            --text-main: #2d3748;
+            --border-color: #e2e8f0;
+            --header-bg: #1a253a;
+            --tech-cyan: #1de9b6;
+            /* Quest Colors */
+            --quest-green: #059669; --quest-cyan: #0891b2; --quest-blue: #2563eb; --quest-purple: #7c3aed; --quest-god: #d97706;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.8;
+            color: var(--text-main);
+            background-color: #edf2f7;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 50px;
+        }
+
+        /* ヘッダー */
+        header {
+            background: var(--header-bg);
+            color: #fff;
+            padding: 50px 20px 40px;
+            text-align: center;
+        }
+
+        .confidential {
+            font-size: 0.85rem;
+            letter-spacing: 0.3em;
+            opacity: 0.8;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .header-main-title {
+            font-size: 1.8rem;
+            margin: 0;
+            line-height: 1.4;
+            font-weight: bold;
+        }
+
+        .header-sub-title {
+            font-size: 1rem;
+            margin-top: 20px;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+        /* ナビゲーション */
+        nav {
+            background: var(--header-bg);
+            padding: 15px 10px;
+            border-top: 4px solid var(--nyanko-gold);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            background: #2d3748;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .nav-btn span { margin-right: 6px; }
+        .nav-btn.active { background: var(--nyanko-gold); }
+
+        /* コンテンツエリア */
+        main { padding: 40px 50px; }
+        h2 { color: var(--nyanko-navy); border-bottom: 2px solid var(--nyanko-blue); padding-bottom: 10px; margin-top: 50px; font-size: 1.6rem; letter-spacing: 0.05em; }
+        h3 { color: var(--nyanko-blue); border-left: 5px solid var(--nyanko-gold); padding-left: 15px; margin-top: 40px; font-size: 1.3rem; }
+        
+        .box { background: var(--nyanko-gray); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        strong { color: var(--nyanko-navy); background: linear-gradient(transparent 70%, #bee3f8 70%); }
+
+        /* 合言葉ボックス */
+        .motto-box { background: #08162b; color: #ffeb3b; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 1.2rem; margin: 30px 0; border: 2px solid var(--nyanko-gold); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        /* アルゴリズム・計算式 */
+        .algo-box { background-color: #f0fff4; border: 3px solid #38a169; border-radius: 12px; padding: 25px; margin: 30px 0; }
+        .algo-title { color: #2f855a; font-weight: 900; font-size: 1.2em; border-bottom: 2px dashed #2f855a; padding-bottom: 10px; margin-bottom: 20px; display: block; text-align: center; }
+        .algo-formula { font-family: "Courier New", monospace; font-size: 1.5rem; background: #fff; padding: 15px; border-radius: 6px; text-align: center; margin: 15px 0; font-weight: bold; color: #2d3748; border: 1px solid #cbd5e0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* 倍率テーブル */
+        .multiplier-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 8px; overflow: hidden; }
+        .multiplier-table th, .multiplier-table td { border: 1px solid #eee; padding: 12px; text-align: center; font-size: 0.9rem; }
+        .multiplier-table th { background: #f1f5f9; color: var(--nyanko-blue); font-weight: bold; }
+
+        /* 安全装置 */
+        .stop-box { border: 2px solid var(--nyanko-red); background: #fff5f5; padding: 25px; border-radius: 12px; text-align: center; font-weight: bold; margin-top: 25px; color: var(--nyanko-red); }
+
+        /* 🗓️ 毎月のサイクル */
+        .cycle-box { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 6px solid var(--nyanko-blue); padding: 25px; margin: 25px 0; border-radius: 0 12px 12px 0; }
+        .cycle-day { font-weight: bold; color: var(--nyanko-blue); display: block; margin-top: 15px; font-size: 1.1rem; }
+        .cycle-day:first-child { margin-top: 0; }
+
+        /* 💸 裏技：給料前借り */
+        .tech-box { border: 2px solid var(--tech-cyan); background: #f0fffb; padding: 25px; border-radius: 12px; margin: 30px 0; }
+        .tech-title { color: #00a881; font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 15px; border-bottom: 1px dashed var(--tech-cyan); padding-bottom: 8px; }
+
+        /* ⚖️ 鉄の掟 */
+        .iron-rules { background: #fffaf0; border: 2px solid var(--nyanko-gold); border-radius: 12px; padding: 25px; margin: 30px 0; }
+        .rule-item { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .rule-label { color: var(--nyanko-gold); font-weight: bold; display: block; margin-bottom: 5px; font-size: 1.1rem; }
+
+        /* ⚡ 特別作戦（リレーデザイン） */
+        .tactical-box { background-color: #fff; border: 2px solid #ed8936; padding: 25px; border-radius: 12px; margin: 40px 0; box-shadow: 0 4px 12px rgba(237, 137, 54, 0.1); }
+        .tactical-title { color: #c05621; font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 25px; text-align: center; border-bottom: 2px solid #ed8936; padding-bottom: 10px; }
+        .tactical-step { background: #fffaf0; padding: 20px; border-radius: 10px; margin-bottom: 15px; position: relative; border-left: 5px solid #ed8936; }
+        .tactical-step:last-child { margin-bottom: 0; }
+        .step-label { font-weight: 900; color: #c05621; display: block; margin-bottom: 8px; font-size: 1.1rem; }
+        .step-relay-arrow { text-align: center; color: #ed8936; font-size: 1.5rem; margin: 5px 0; line-height: 1; }
+
+        /* テーブル一般 */
+        .standard-table { width: 100%; border-collapse: collapse; margin: 25px 0; }
+        .standard-table th, .standard-table td { border: 1px solid var(--border-color); padding: 15px; text-align: left; vertical-align: middle; }
+        .standard-table th { background-color: var(--nyanko-navy); color: #fff; font-weight: bold; font-size: 0.9rem; }
+        tr:nth-child(even) { background-color: #fafbfc; }
+
+        /* Quest Card */
+        .quest-card { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 30px; overflow: hidden; background: #fff; box-shadow: 0 6px 12px rgba(0,0,0,0.05); }
+        .quest-header { padding: 15px 20px; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .q-green { background-color: var(--quest-green); border-left: 8px solid #047857; }
+        .q-cyan { background-color: var(--quest-cyan); border-left: 8px solid #0e7490; }
+        .q-blue { background-color: var(--quest-blue); border-left: 8px solid #1d4ed8; }
+        .q-purple { background-color: var(--quest-purple); border-left: 8px solid #6d28d9; }
+        .q-god { background: linear-gradient(90deg, #d97706, #f59e0b); border-left: 8px solid #b45309; }
+        .quest-body { padding: 25px; }
+        .quest-highlight { font-weight: bold; color: var(--nyanko-navy); background: #eef2ff; padding: 2px 6px; border-radius: 4px; }
+        .badge-now { background-color: var(--quest-green); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold; margin-right: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        footer { text-align: center; padding: 50px 20px; background: var(--nyanko-navy); color: #fff; border-top: 6px solid var(--nyanko-gold); }
+
+        ul, ol { padding-left: 25px; margin: 15px 0; }
+        li { margin-bottom: 12px; }
+
+        @media (max-width: 600px) {
+            main { padding: 30px 20px; }
+            .header-main-title { font-size: 1.4rem; }
+            .nav-btn { width: 47%; justify-content: center; font-size: 0.75rem; padding: 10px 5px; }
+            .algo-formula { font-size: 1.1rem; }
+            .motto-box { font-size: 1rem; }
+            .standard-table th, .standard-table td { display: block; width: 100%; border-bottom: none; }
+            .standard-table td:last-child { border-bottom: 1px solid var(--border-color); }
+            .quest-header { flex-direction: column; align-items: flex-start; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <span class="confidential">CONFIDENTIAL DOCUMENT</span>
+            <div class="header-main-title">
+                ニャンコ・ホールディングス<br>グランド・マスタープラン 2026
+            </div>
+            <p class="header-sub-title">〜 ニャンコ式投資法のすべて 〜</p>
+        </header>
+
+        <nav>
+            <a href="index.html" class="nav-btn"><span>💻</span>ポータルへ</a>
+            <a href="philosophy.html" class="nav-btn"><span>🏠</span>理念・税金</a>
+            <a href="invest.html" class="nav-btn active"><span>📈</span>投資</a>
+            <a href="roadmap.html" class="nav-btn"><span>📅</span>ロードマップ</a>
+        </nav>
+
+        <main>
+            <section>
+                <h2>第5章：【攻撃】NASDAQ100と投資戦略（資金階層システム）</h2>
+                <div class="box" style="border-left: 6px solid var(--nyanko-blue);">
+                    ■ <strong>投資対象：</strong> NASDAQ100 (特定口座:1545 / NISA:NDX投資信託)<br>
+                    ■ <strong>基本比率：</strong> <strong>株 60% : 現金 40%</strong> を死守<br>
+                    ■ <strong>戦略：</strong> ガチホ ＆ 暴落時ナンピン
+                </div>
+
+                <h3>1. 📉 注文ルールの計算式</h3>
+                <div class="algo-box">
+                    <span class="algo-title">注文ルールの計算式（絶対遵守）</span>
+                    <div class="algo-formula">
+                        1545の注文口数 ＝ ( N － 1 ) × <span style="color:var(--nyanko-blue)">倍率</span>
+                    </div>
+                    <div class="algo-desc">
+                        <strong>📌 変数「N」の定義：</strong><br>
+                        最高値からの下落率（％）の<strong>「整数部分」</strong>。<br>
+                        <em>例： -3.5% ➡ N=3 ／ -15.9% ➡ N=15</em>
+                    </div>
+                    <div class="algo-desc">
+                        <strong>📌 変数「倍率」の定義（Quest to God 連動）：</strong><br>
+                        現在の総資産規模（億の位）に連動する。<br>
+                        <table class="multiplier-table">
+                            <tr><th>資産規模</th><th>倍率</th></tr>
+                            <tr><td>〜1.9 億円</td><td><strong>× 1 倍</strong></td></tr>
+                            <tr><td>2 億円台</td><td><strong>× 2 倍</strong></td></tr>
+                            <tr><td>3 億円台</td><td><strong>× 3 倍</strong></td></tr>
+                            <tr><td>5 億円台</td><td><strong>× 5 倍</strong></td></tr>
+                            <tr><td>10 億円〜</td><td style="color:var(--nyanko-gold);"><strong>× 10 倍</strong></td></tr>
+                        </table>
+                    </div>
+                    <div class="safety-box">
+                        <span style="color:#c53030; font-weight:bold; display:flex; align-items:center; margin-bottom:10px;">🛡️ 安全装置 (Safety Valve)</span>
+                        <p style="margin:5px 0 15px 0; font-size:0.95em; color:#4a5568;">
+                            暴落時に現金を使い果たさないためのブレーキ。この計算式の比率を超えて買ってはいけません。
+                        </p>
+                        <div style="font-weight:bold; font-family:'Courier New', monospace; text-align:center; font-size:1.1rem; background:#fff; padding:15px; border-radius:6px; border: 1px solid #ddd; margin-bottom:20px;">
+                            安全限界ライン ＝ 60 × 1 ÷ ( 1 － 下落率 )
+                        </div>
+                        <div style="border-top:1px dashed #e53e3e; padding-top:15px;">
+                            <span style="color:#c53030; font-weight:bold; font-size:1.1rem;">⛔ 最終防衛ライン（気絶ルール）</span>
+                            <span style="font-size:0.95em; line-height:1.7; display:block; margin-top:10px;">
+                                下落率が <strong>-40%</strong> を超え、資産配分が <strong>株 90% : 現金 10%</strong> に達したら<br>
+                                <strong style="color:var(--nyanko-red); font-size:1.2rem; border:2px solid var(--nyanko-red); padding:2px 8px; display:inline-block; margin-top:5px;">STOP!! 買い注文禁止</strong><br>
+                                気絶して嵐が過ぎるのを待つ。
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>2. 資金の3層構造と借入マトリクス</h3>
+                <table class="standard-table">
+                    <thead>
+                        <tr><th>部隊名</th><th>資金の正体</th><th>役割・出動条件</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>第1部隊</strong></td><td>証券口座の現金</td><td>【主力】 日々のリバランス用。「株60：現金40」を死守する。</td></tr>
+                        <tr><td><strong>第2部隊</strong></td><td>還付金（待機）</td><td>【補給】 ステルス入金。平時は月割で第1部隊へ合流。<br>※暴落時は残弾を一括投入して全軍突撃。</td></tr>
+                        <tr><td><strong>第3部隊</strong></td><td>共済借入枠</td><td>【切り札】 影の現金（Shadow Cash）。平時は存在しないものとする。<br>現金が枯渇するほどの大暴落時のみ召喚する。</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>戦略的借入マトリクス（スピード vs 金利）</h4>
+                <table class="standard-table">
+                    <thead>
+                        <tr><th>技名</th><th>資金源</th><th>金利 / スピード</th><th>発動条件・用途</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background:#fff5f5;">
+                            <td><strong>Time Machine</strong></td><td><strong>信用取引</strong></td><td>2.8% / <span class="highlight-red">最速(0秒)</span></td>
+                            <td>【短期急襲用】 「今、この瞬間」を拾う。給料入金時に即現引。</td>
+                        </tr>
+                        <tr style="background:#f0f9ff;">
+                            <td><strong>第3部隊</strong></td><td><strong>共済借入</strong></td><td>0.9% / 数日</td>
+                            <td>【長期・計画用】 歴史的大暴落、計画的なクロス取引。</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>3. 毎月のサイクル</h3>
+                <div class="cycle-box">
+                    <span class="cycle-day">🔹 毎月25日 (給料日)</span>
+                    <ul>
+                        <li>給料着金。何もしない。支払いをすべて完了させる。</li>
+                    </ul>
+                    <span class="cycle-day">🔹 毎月15日 (リバランス日)</span>
+                    <ul>
+                        <li>余剰資金を確定し、入金。比率調整。裏技使用時は即現引。</li>
+                    </ul>
+                </div>
+
+                <div class="tech-box">
+                    <span class="tech-title">💸 裏技：給料前借り (Time Machine)</span>
+                    <p>現金がない時に暴落が来たら：</p>
+                    <ol>
+                        <li>1545を担保に <strong>信用買い(制度)</strong></li>
+                        <li>上限は <strong>次回の給料額</strong> まで</li>
+                        <li>給料が入ったら即入金 ＆ <strong>現引</strong></li>
+                    </ol>
+                </div>
+
+                <div class="tactical-box">
+                    <span class="tactical-title">⚡ 特別作戦：年末年始「損出し＆NISA移管」リレー</span>
+                    
+                    <div class="tactical-step">
+                        <span class="step-label">❶ 12月 (損出し)</span>
+                        <div><strong>目的：</strong> 特定口座の含み損を確定させ、税金を取り戻す。<br><strong>Action：</strong> 保有中の「1545」を売却し、即座に<strong>「2631（MAXISナスダック100）」</strong>を買う。</div>
+                    </div>
+
+                    <div class="step-relay-arrow">▼</div>
+
+                    <div class="tactical-step">
+                        <span class="step-label">❷ 1月 (NISA移管)</span>
+                        <div><strong>目的：</strong> 特定口座（課税）から新NISA（非課税）へ資金を移す。<br><strong>Action：</strong> 手元現金でNISA投信を発注。同日に特定口座の2631を売却。ノーポジション時間をゼロにする。</div>
+                    </div>
+                </div>
+
+                <h3>4. 鉄の掟 (Iron Rules)</h3>
+                <div class="iron-rules">
+                    <div class="rule-item">
+                        <span class="rule-label">■ ショート(空売り)禁止</span>
+                        無限のリスクを負わない。
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-label">■ 狼狽売り禁止</span>
+                        暴落はバーゲンセール。「歴史的高値」はいずれ更新されると信じる。
+                    </div>
+                </div>
+
+                <div class="motto-box">
+                    合言葉：「下がったらバーゲン、上がったら資産増」
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Nyanko Holdings. All Rights Reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
