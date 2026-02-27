@@ -99,6 +99,7 @@
 
         .nav-btn span { margin-right: 6px; }
         .nav-btn.active { background: var(--nyanko-gold); }
+        .nav-btn.alert { background: var(--nyanko-red); box-shadow: 0 0 10px rgba(229,62,62,0.5); }
 
         /* コンテンツエリア */
         main { padding: 40px 50px; }
@@ -134,10 +135,6 @@
         .arrow { font-size: 1.2rem; display: block; color: var(--nyanko-gold); line-height: 1; }
         .note { font-size: 0.85rem; color: #718096; display: block; margin-top: 5px; }
 
-        /* 💸 裏技：給料前借り */
-        .tech-box { border: 2px solid var(--tech-cyan); background: #f0fffb; padding: 25px; border-radius: 12px; margin: 30px 0; }
-        .tech-title { color: #00a881; font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 15px; border-bottom: 1px dashed var(--tech-cyan); padding-bottom: 8px; }
-
         /* ⚖️ 鉄の掟 */
         .iron-rules { background: #fffaf0; border: 2px solid var(--nyanko-gold); border-radius: 12px; padding: 25px; margin: 30px 0; }
         .rule-item { margin-bottom: 15px; display: flex; flex-direction: column; }
@@ -157,18 +154,6 @@
         .standard-table th { background-color: var(--nyanko-navy); color: #fff; font-weight: bold; font-size: 0.9rem; }
         tr:nth-child(even) { background-color: #fafbfc; }
 
-        /* Quest Card */
-        .quest-card { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 30px; overflow: hidden; background: #fff; box-shadow: 0 6px 12px rgba(0,0,0,0.05); }
-        .quest-header { padding: 15px 20px; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .q-green { background-color: var(--quest-green); border-left: 8px solid #047857; }
-        .q-cyan { background-color: var(--quest-cyan); border-left: 8px solid #0e7490; }
-        .q-blue { background-color: var(--quest-blue); border-left: 8px solid #1d4ed8; }
-        .q-purple { background-color: var(--quest-purple); border-left: 8px solid #6d28d9; }
-        .q-god { background: linear-gradient(90deg, #d97706, #f59e0b); border-left: 8px solid #b45309; }
-        .quest-body { padding: 25px; }
-        .quest-highlight { font-weight: bold; color: var(--nyanko-navy); background: #eef2ff; padding: 2px 6px; border-radius: 4px; }
-        .badge-now { background-color: var(--quest-green); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold; margin-right: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
         footer { text-align: center; padding: 50px 20px; background: var(--nyanko-navy); color: #fff; border-top: 6px solid var(--nyanko-gold); }
 
         ul, ol { padding-left: 25px; margin: 15px 0; }
@@ -182,7 +167,6 @@
             .motto-box { font-size: 1rem; }
             .standard-table th, .standard-table td { display: block; width: 100%; border-bottom: none; }
             .standard-table td:last-child { border-bottom: 1px solid var(--border-color); }
-            .quest-header { flex-direction: column; align-items: flex-start; gap: 5px; }
         }
     </style>
 </head>
@@ -201,6 +185,7 @@
             <a href="philosophy.html" class="nav-btn"><span>🏠</span>理念・税金</a>
             <a href="invest.html" class="nav-btn active"><span>📈</span>投資</a>
             <a href="roadmap.html" class="nav-btn"><span>📅</span>ロードマップ</a>
+            <a href="secret.html" class="nav-btn alert"><span>🔥</span>裏マニュアル</a>
         </nav>
 
         <main>
@@ -243,43 +228,24 @@
                         <div style="font-weight:bold; font-family:'Courier New', monospace; text-align:center; font-size:1.1rem; background:#fff; padding:15px; border-radius:6px; border: 1px solid #ddd; margin-bottom:20px;">
                             安全限界ライン ＝ 60 × 1 ÷ ( 1 － 下落率 )
                         </div>
-                        <div style="border-top:1px dashed #e53e3e; padding-top:15px;">
-                            <span style="color:#c53030; font-weight:bold; font-size:1.1rem;">⛔ 最終防衛ライン（気絶ルール）</span>
-                            <span style="font-size:0.95em; line-height:1.7; display:block; margin-top:10px;">
-                                下落率が <strong>-40%</strong> を超え、資産配分が <strong>株 90% : 現金 10%</strong> に達したら<br>
-                                <strong style="color:var(--nyanko-red); font-size:1.2rem; border:2px solid var(--nyanko-red); padding:2px 8px; display:inline-block; margin-top:5px;">STOP!! 買い注文禁止</strong><br>
-                                気絶して嵐が過ぎるのを待つ。
+                        <div style="border-top:1px dashed #e53e3e; padding-top:15px; background: #fff5f5; padding: 20px; border-radius: 8px; margin-top: 15px; text-align: center;">
+                            <span style="color:#c53030; font-weight:bold; font-size:1.2rem; display: block; margin-bottom: 10px;">🚨 非常事態（暴落時）への移行</span>
+                            <span style="font-size:0.95em; line-height:1.7; display:block; color: #4a5568;">
+                                下落率が <strong>-20%</strong> を超える、または手持ち現金が枯渇した場合は<br>平時のルールを完全に破棄し、外部資金を投入する。<br>
+                                <a href="secret.html" style="color:var(--nyanko-red); font-size:1.1rem; font-weight:bold; border:2px solid var(--nyanko-red); padding:8px 20px; display:inline-block; margin-top:15px; text-decoration:none; border-radius:6px; background:#fff; transition: 0.2s;">🔥 【裏マニュアル】総力戦プロトコルへ</a>
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <h3>2. 資金の3層構造と借入マトリクス</h3>
+                <h3>2. 平時の資金構造（2層システム）</h3>
                 <table class="standard-table">
                     <thead>
                         <tr><th>部隊名</th><th>資金の正体</th><th>役割・出動条件</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><strong>第1部隊</strong></td><td>証券口座の現金</td><td>【主力】 日々のリバランス用。「株60：現金40」を死守する。</td></tr>
+                        <tr><td><strong>第1部隊</strong></td><td>証券口座の現金</td><td>【主力】 日々のリバランス用。「株60：現金40」を<strong>厳守する。</strong></td></tr>
                         <tr><td><strong>第2部隊</strong></td><td>還付金（待機）</td><td>【補給】 ステルス入金。平時は月割で第1部隊へ合流。<br>※暴落時は残弾を一括投入して全軍突撃。</td></tr>
-                        <tr><td><strong>第3部隊</strong></td><td>共済借入枠</td><td>【切り札】 影の現金（Shadow Cash）。平時は存在しないものとする。<br>現金が枯渇するほどの大暴落時のみ召喚する。</td></tr>
-                    </tbody>
-                </table>
-
-                <h4>戦略的借入マトリクス（スピード vs 金利）</h4>
-                <table class="standard-table">
-                    <thead>
-                        <tr><th>技名</th><th>資金源</th><th>金利 / スピード</th><th>発動条件・用途</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr style="background:#fff5f5;">
-                            <td><strong>Time Machine</strong></td><td><strong>信用取引</strong></td><td>2.8% / <span class="highlight-red">最速(0秒)</span></td>
-                            <td>【短期急襲用】 「今、この瞬間」を拾う。給料入金時に即現引。</td>
-                        </tr>
-                        <tr style="background:#f0f9ff;">
-                            <td><strong>第3部隊</strong></td><td><strong>共済借入</strong></td><td>0.9% / 数日</td>
-                            <td>【長期・計画用】 歴史的大暴落、計画的なクロス取引。</td>
-                        </tr>
                     </tbody>
                 </table>
 
@@ -352,21 +318,6 @@
                     <ul>
                         <li>リバランスをした日は<strong>「ナンピン買い」はお休み</strong>とする。<br><span class="note">（60%に戻すだけで十分仕事をしたため）</span></li>
                     </ul>
-
-                    <h3>裏技処理</h3>
-                    <ul>
-                        <li>裏技（信用買い）使用時は、即「現引」を行う。</li>
-                    </ul>
-                </div>
-
-                <div class="tech-box">
-                    <span class="tech-title">💸 裏技：給料前借り (Time Machine)</span>
-                    <p>現金がない時に暴落が来たら：</p>
-                    <ol>
-                        <li>1545を担保に <strong>信用買い(制度)</strong></li>
-                        <li>上限は <strong>次回の給料額</strong> まで</li>
-                        <li>給料が入ったら即入金 ＆ <strong>現引</strong></li>
-                    </ol>
                 </div>
 
                 <div class="tactical-box">
