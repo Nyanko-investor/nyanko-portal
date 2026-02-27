@@ -45,10 +45,13 @@
         .result-main { font-size: 1.8rem; color: var(--nyanko-red); border-bottom: 3px solid var(--nyanko-red); padding-bottom: 5px; margin-top: 5px; }
 
         /* 下部ナビゲーション */
-        .doc-section { margin-top: 50px; padding-bottom: 60px; }
+        .doc-section { margin-top: 50px; padding-bottom: 60px; text-align: center; }
         .doc-label { font-weight: bold; color: #4a5568; margin-bottom: 15px; font-size: 0.9rem; display: block; }
-        nav { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .nav-link { display: inline-block; padding: 10px 20px; background: var(--nyanko-blue); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem; min-width: 100px; }
+        .doc-nav { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .nav-link { display: inline-block; padding: 10px 20px; background: var(--nyanko-blue); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem; min-width: 100px; text-align: center; }
+        .nav-link:hover { background: #1a365d; }
+        .nav-link-alert { background: var(--nyanko-red); box-shadow: 0 4px 6px rgba(229, 62, 62, 0.3); }
+        .nav-link-alert:hover { background: #c53030; box-shadow: 0 6px 8px rgba(229, 62, 62, 0.4); transform: translateY(-2px); transition: all 0.2s; }
         
         @media (max-width: 600px) { .calc-input-field { width: 95px; } .nav-link { padding: 10px 15px; } }
     </style>
@@ -115,11 +118,12 @@
 
         <div class="doc-section">
             <span class="doc-label">▼ 社内規定・戦略ドキュメント ▼</span>
-            <nav>
+            <div class="doc-nav">
                 <a href="philosophy.html" class="nav-link">🏠 理念</a>
                 <a href="invest.html" class="nav-link">📈 投資</a>
                 <a href="roadmap.html" class="nav-link">📅 計画</a>
-            </nav>
+                <a href="secret.html" class="nav-link nav-link-alert">🔥 裏マニュアル</a>
+            </div>
         </div>
     </div>
 
@@ -147,7 +151,6 @@
                 res.innerHTML = "🎉 新高値更新中！";
             }
             else if (units <= 0) { // 注文数が0口以下なら、GOを出さずに待機
-                // 修正： (N=...) の表示を削除しました
                 res.innerHTML = `<div>📉 下落率 ${drop.toFixed(1)}%</div><div style='color:#718096; font-size:1.5rem; margin-top:5px;'>まだ待機！</div>`;
             }
             else { // 注文数が1口以上ならGO!
