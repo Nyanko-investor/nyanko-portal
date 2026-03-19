@@ -19,9 +19,17 @@
         .nyanko-logo { font-size: clamp(3rem, 12vw, 4.5rem); font-weight: bold; letter-spacing: -2px; margin-bottom: 30px; font-family: 'Century Gothic', Futura, sans-serif; line-height: 1.1; }
         .n1 { color: var(--bruna-red); } .y1 { color: var(--bruna-blue); } .a1 { color: var(--bruna-yellow); } .n2 { color: var(--bruna-green); } .k1 { color: var(--bruna-red); } .o1 { color: var(--bruna-blue); } .exc { color: var(--bruna-yellow); }
 
-        .search-box-wrapper { max-width: 580px; margin: 0 auto 40px; position: relative; }
+        .search-box-wrapper { max-width: 580px; margin: 0 auto 30px; position: relative; }
         .search-input { width: 100%; padding: 12px 20px 12px 45px; font-size: 1.1rem; border: 1px solid #dfe1e5; border-radius: 24px; outline: none; box-shadow: 0 1px 6px rgba(32,33,36,0.20); box-sizing: border-box; -webkit-appearance: none; }
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9aa0a6; font-size: 1.2rem; }
+
+        /* ★ 新追加：お天気ウィジェットのスタイル ★ */
+        .weather-widget { max-width: 580px; margin: 0 auto 40px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .weather-main { font-size: 1.2rem; font-weight: bold; color: var(--nyanko-blue); margin-bottom: 5px; }
+        .weather-main span.icon { font-size: 1.4rem; margin-right: 5px; }
+        .weather-sub { font-size: 0.9rem; color: #4a5568; background: #edf2f7; display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold;}
+        .weather-loading { color: #a0aec0; font-size: 0.9rem; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
         /* リンクボタン群 */
         .quick-links { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; padding: 0 10px; max-width: 900px; margin-left: auto; margin-right: auto; }
@@ -67,6 +75,10 @@
                 <span class="search-icon">🔍</span>
                 <input type="text" name="q" class="search-input" placeholder="Google で検索" autofocus>
             </form>
+        </div>
+
+        <div id="weather-widget" class="weather-widget">
+            <div class="weather-loading">☁️ 最新の気象データを取得中...</div>
         </div>
 
         <div class="quick-links">
@@ -129,11 +141,91 @@
     </div>
 
     <script>
+        // ★ 新追加：お天気ウィジェットの取得ロジック ★
+        async function fetchWeather() {
+            try {
+                // 気象庁とOpen-Meteoのデータを取得
+                const [jmaRes, meteoRes] = await Promise.all([
+                    fetch("https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json"),
+                    fetch("https://api.open-meteo.com/v1/forecast?latitude=35.45&longitude=139.65&current=relative_humidity_2m&timezone=Asia%2FTokyo")
+                ]);
+                
+                const jmaData = await jmaRes.json();
+                const meteoData = await meteoRes.json();
+                
+                const humidity = meteoData.current.relative_humidity_2m;
+                
+                // 天気テキストの整形
+                let rawWeather = jmaData[0].timeSeries[0].areas[0].weathers[0].replace(/　/g, " ");
+                let words = rawWeather.split(" ");
+                let main = words[0];
+                if (main.includes("晴")) main = "晴れ";
+                else if (main.includes("雨")) main = "雨";
+                else if (main.includes("雪")) main = "雪";
+                else if (main.includes("くもり") || main.includes("曇")) main = "くもり";
+                
+                let sub = "";
+                for (let i = 1; i < words.length; i++) {
+                    if (words[i].includes("晴") && main !== "晴れ") sub = "晴れ";
+                    else if (words[i].includes("雨") && main !== "雨") sub = "雨";
+                    else if (words[i].includes("雪") && main !== "雪") sub = "雪";
+                    else if ((words[i].includes("くもり") || words[i].includes("曇")) && main !== "くもり") sub = "くもり";
+                }
+                let weatherShort = sub ? `${main}一時${sub}` : main;
+
+                // お天気アイコンの自動判定
+                let icon = "☁️";
+                if (main === "晴れ") icon = "☀️";
+                else if (main === "雨") icon = "☔️";
+                else if (main === "雪") icon = "⛄️";
+                
+                // 降水確率
+                let pop = jmaData[0].timeSeries[1].areas[0].pops[0] || "0";
+                
+                // 気温の振り分け（昼間の更新バグ対策済）
+                let temps = jmaData[0].timeSeries[2].areas[0].temps;
+                let minTemp = "--", maxTemp = "--";
+                if (temps && temps.length >= 2) {
+                    let t1 = parseInt(temps[0]);
+                    let t2 = parseInt(temps[1]);
+                    minTemp = Math.min(t1, t2).toString();
+                    maxTemp = Math.max(t1, t2).toString();
+                } else if (temps && temps.length === 1) {
+                    maxTemp = temps[0];
+                }
+                
+                // 傘と服のアドバイス
+                let maxT = parseInt(maxTemp) || 20;
+                let popInt = parseInt(pop);
+                let umbrella = popInt >= 50 ? "かならず持参" : popInt >= 30 ? "おりたたみ推奨" : "今日は不要";
+                let clothes = maxT >= 25 ? "はんそで" : maxT >= 20 ? "ながそで" : maxT >= 15 ? "上着" : "コート";
+
+                // HTMLに流し込む
+                const widget = document.getElementById("weather-widget");
+                widget.innerHTML = `
+                    <div class="weather-main"><span class="icon">${icon}</span>【横浜】${weatherShort}</div>
+                    <div style="font-size: 1.05rem; margin-bottom: 8px;">
+                        気温: <b>${maxTemp}℃</b> / <b>${minTemp}℃</b> (湿${humidity}%) | 降水: <b>${pop}%</b>
+                    </div>
+                    <div class="weather-sub">🌂 傘: ${umbrella} ｜ 👕 服: ${clothes}</div>
+                `;
+            } catch (error) {
+                console.error("天気取得エラー", error);
+                document.getElementById("weather-widget").innerHTML = "天気データの取得に失敗しました😿";
+            }
+        }
+
+        // ページ読み込み時に実行する処理まとめ
         document.addEventListener('DOMContentLoaded', () => {
+            // お天気の取得を開始！
+            fetchWeather();
+
+            // 計算機のキャッシュ読み込み
             const saved = localStorage.getItem('nyankoHighPrice');
             if (saved) document.getElementById('highPrice').value = saved;
         });
 
+        // 計算機のロジック
         function calculate() {
             let h = parseFloat(document.getElementById('highPrice').value);
             let c = parseFloat(document.getElementById('currentPrice').value);
@@ -147,14 +239,13 @@
             let N = Math.floor(drop);
             let units = (N - 1) * m;
 
-            // ▼ ロジック修正箇所 ▼
             if (drop < 0) {
                 res.innerHTML = "🎉 新高値更新中！";
             }
-            else if (units <= 0) { // 注文数が0口以下なら、GOを出さずに待機
+            else if (units <= 0) {
                 res.innerHTML = `<div>📉 下落率 ${drop.toFixed(1)}%</div><div style='color:#718096; font-size:1.5rem; margin-top:5px;'>まだ待機！</div>`;
             }
-            else { // 注文数が1口以上ならGO!
+            else {
                 res.innerHTML = `<div style='color:var(--nyanko-red); font-size:1.5rem;'>🚨 GO! (下落 ${drop.toFixed(1)}%)</div><div class='result-main'>注文数：${units} 口</div>`;
             }
         }
