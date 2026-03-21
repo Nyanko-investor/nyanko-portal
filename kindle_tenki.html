@@ -2,13 +2,17 @@ const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month:
         const formatter = new Intl.DateTimeFormat('ja-JP', options);
 
         const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
-        // ★変更点：Open-Meteoから最高気温と最低気温も取得するようにURLを変更
         const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo";
 
         async function fetchWeather() {
             try {
-                // 1. 気象庁からお天気テキストを取得
-                const response = await fetch(jmaUrl);
+                // ★追加：キャッシュバスター（毎回違うランダムな数字を生成）
+                const uniqueTime = new Date().getTime();
+                const jmaNoCache = jmaUrl + "?_=" + uniqueTime;
+                const meteoNoCache = meteoUrl + "&_=" + uniqueTime;
+
+                // URLの後ろにランダム数字をつけて、強制的に最新データを取得
+                const response = await fetch(jmaNoCache, { cache: "no-store" });
                 const data = await response.json();
 
                 const parts = formatter.formatToParts(new Date());
@@ -41,22 +45,20 @@ const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month:
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 2. Open-Meteoから気温と湿度を取得（★気象庁の配列バグ対策）
+                // Open-Meteo側もキャッシュを回避
                 try {
-                    const meteoRes = await fetch(meteoUrl);
+                    const meteoRes = await fetch(meteoNoCache, { cache: "no-store" });
                     const meteoData = await meteoRes.json();
                     
                     const humidity = meteoData.current.relative_humidity_2m;
                     document.getElementById('humidityText').innerText = `(湿度 ${humidity}%)`;
 
-                    // 今日の最低・最高気温（小数点四捨五入）
                     const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
                     const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
                     
                     document.getElementById('minTemp').innerText = minT;
                     document.getElementById('maxTemp').innerText = maxT;
 
-                    // 服装アドバイス（maxTを使う）
                     let clothesMsg = "";
                     if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
                     else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
@@ -79,11 +81,10 @@ const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month:
         // 初回読み込み
         fetchWeather();
 
-        // ★変更点：古いKindleでも確実にスリープ復帰を検知するタイムワープ（ハートビート）作戦
+        // タイムワープ検知（5秒ごとに時間を監視し、60秒以上スリープしていたら更新）
         let lastTime = Date.now();
         setInterval(() => {
             const currentTime = Date.now();
-            // 5秒ごとに時間をチェック。もし前回から「60秒以上」ワープしていたら、スリープから目覚めたと判断して更新！
             if (currentTime - lastTime > 60000) {
                 fetchWeather(); 
             }
