@@ -23,7 +23,18 @@
         .date { font-size: 2.2rem; font-weight: bold; margin-bottom: 20px; }
         .time { font-size: 1.5rem; font-weight: bold; white-space: nowrap; }
         .main-content { padding: 0 10px; flex-grow: 1; }
-        .weather { font-size: 4rem; font-weight: bold; margin: 20px 0; line-height: 1.2; }
+        
+        /* つなぎ文字が小さくなった時に行間が詰まりすぎないよう1.4に調整 */
+        .weather { font-size: 4rem; font-weight: bold; margin: 20px 0; line-height: 1.4; }
+
+        /* ★新設：つなぎ言葉（のち、昼過ぎなど）用のスタイル設定 */
+        .connector {
+            font-size: 2rem; /* サイズを小さく */
+            font-weight: normal; /* 太字を解除 */
+            margin: 0 4px; /* 横に少し余白を追加 */
+            vertical-align: middle; /* 上下中央に配置 */
+        }
+        
         .temp-container { margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .temp { font-size: 4rem; font-weight: bold; }
         .humidity { font-size: 2.5rem; font-weight: normal; margin-top: 10px; }
@@ -43,7 +54,7 @@
     </div>
 
     <div class="main-content">
-        <div class="weather" id="weatherText">読込中...</div>
+        <div class="weather" id="weatherText"></div>
         
         <div class="temp-container">
             <div class="temp">
@@ -100,9 +111,17 @@
                 
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり');
-                document.getElementById('weatherText').innerText = cleanWeather;
+                
+                // ★追加：つなぎ言葉だけを小さくする処理
+                // 気象庁の予報用語に含まれるコネクター文字を検知
+                const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
+                // 対象の文字を<span class="connector">で囲む
+                const htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
+                
+                // もとの「innerText」をタグが使える「innerHTML」に変更して画面に表示
+                document.getElementById('weatherText').innerHTML = htmlWeather;
 
-                // 傘アドバイスのロジック
+                // 傘アドバイスのロジック（もとのまま）
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
                     if (cleanWeather.includes('一時') || cleanWeather.includes('のち') || cleanWeather.includes('ところにより')) {
                         document.getElementById('umbrellaText').innerText = "折りたたみかさがあると安心！";
@@ -113,7 +132,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 2. Open-Meteoから気温と湿度を取得（気象庁の欠損対策）
+                // 2. Open-Meteoから気温と湿度を取得（もとのまま）
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -127,7 +146,7 @@
                     document.getElementById('minTemp').innerText = minT;
                     document.getElementById('maxTemp').innerText = maxT;
 
-                    // 服装アドバイスのロジック
+                    // 服装アドバイスのロジック（もとのまま）
                     let clothesMsg = "";
                     if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
                     else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
