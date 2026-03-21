@@ -69,15 +69,16 @@
     <script>
         async function fetchWeather() {
             try {
-                // 更新が走った瞬間に右上の表示を「更新中...」に変える
+                // 更新開始の合図
                 const updateTimeEl = document.getElementById('updateTime');
                 updateTimeEl.innerText = "更新中...";
 
-                // キャッシュバスター
+                // キャッシュバスター：URLに時間を混ぜてKindleのサボりを防止
                 const uniqueTime = new Date().getTime();
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
+                // 1. 気象庁データ取得
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -101,6 +102,7 @@
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり');
                 document.getElementById('weatherText').innerText = cleanWeather;
 
+                // 傘アドバイスのロジック
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
                     if (cleanWeather.includes('一時') || cleanWeather.includes('のち') || cleanWeather.includes('ところにより')) {
                         document.getElementById('umbrellaText').innerText = "折りたたみかさがあると安心！";
@@ -111,6 +113,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
+                // 2. Open-Meteoから気温と湿度を取得（気象庁の欠損対策）
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -124,6 +127,7 @@
                     document.getElementById('minTemp').innerText = minT;
                     document.getElementById('maxTemp').innerText = maxT;
 
+                    // 服装アドバイスのロジック
                     let clothesMsg = "";
                     if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
                     else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
@@ -138,7 +142,7 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
-                // 処理が終わったら更新時間を書き換える
+                // 更新完了
                 updateTimeEl.innerText = `${h}:${m} 更新`;
 
             } catch (error) {
@@ -150,14 +154,13 @@
         // 初回読み込み
         fetchWeather();
 
-        // 【実運用：3時間更新】10800000ミリ秒ごとに自動更新
-        // バッテリーに優しく、実用的な更新間隔です
-        setInterval(fetchWeather, 10800000);
+        // 【実運用：1時間更新】3,600,000ミリ秒ごとに自動実行
+        setInterval(fetchWeather, 3600000);
 
         // 念のための全体リロード（6時間おき）
         setTimeout(() => {
             window.location.reload();
-        }, 21600000);
+        }, 21600000); 
 
     </script>
 </body>
