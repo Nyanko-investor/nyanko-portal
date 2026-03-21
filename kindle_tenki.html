@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="60">
+    <meta http-equiv="refresh" content="10800">
     <title>Nyanko Portal Kindle</title>
     <style>
         body {
@@ -213,10 +213,10 @@
 
         fetchWeather();
 
-        // 【テスト用】JavaScriptでも60秒（60000ミリ秒）後に強制リロード
+        // 【エコ設定】JavaScriptでも3時間（10800000ミリ秒）後に強制リロード
         setTimeout(() => {
             window.location.reload();
-        }, 60000); 
+        }, 10800000); 
 
     </script>
 </body>
