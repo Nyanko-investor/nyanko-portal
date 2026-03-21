@@ -13,100 +13,24 @@
             text-align: center;
             margin: 0;
             padding: 0; 
-            /* 画面のどこをタップしても反応するように高さを確保 */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        .header-container {
-            margin-top: 30px; 
-            padding: 0 10px;
-        }
-        
-        .header {
-            display: flex;
-            flex-direction: column;
-            align-items: center; 
-            border-bottom: 3px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 30px; 
-        }
-
-        .date {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin-bottom: 20px; 
-        }
-        
-        .time {
-            font-size: 1.5rem;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .main-content {
-            padding: 0 10px;
-            flex-grow: 1; /* タップ領域を広げる */
-        }
-        
-        .weather {
-            font-size: 4rem;
-            font-weight: bold;
-            margin: 20px 0;
-            line-height: 1.2;
-        }
-        
-        .temp-container {
-            margin-bottom: 30px;
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            line-height: 1.2;
-        }
-
-        .temp {
-            font-size: 4rem; 
-            font-weight: bold;
-        }
-
-        .humidity {
-            font-size: 2.5rem; 
-            font-weight: normal;
-            margin-top: 10px;
-        }
-
-        .advice-box {
-            border: 5px solid #000;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 10px 20px;
-            text-align: left;
-            font-weight: bold;
-        }
-        
-        .advice-item {
-            font-size: 2.0rem; 
-            margin: 15px 0;
-            display: flex; 
-            align-items: center; 
-            padding: 0 10px; 
-        }
-        
-        .text-icon {
-            font-size: 2.0rem; 
-            margin-right: 15px; 
-            min-width: 0; 
-            width: auto; 
-            text-align: center;
-            font-weight: normal; 
-            white-space: nowrap; 
-        }
-
-        #umbrellaText, #clothesText {
-            word-break: break-all; 
-            flex: 1; 
-        }
+        .header-container { margin-top: 30px; padding: 0 10px; }
+        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 30px; }
+        .date { font-size: 2.2rem; font-weight: bold; margin-bottom: 20px; }
+        .time { font-size: 1.5rem; font-weight: bold; white-space: nowrap; }
+        .main-content { padding: 0 10px; flex-grow: 1; }
+        .weather { font-size: 4rem; font-weight: bold; margin: 20px 0; line-height: 1.2; }
+        .temp-container { margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+        .temp { font-size: 4rem; font-weight: bold; }
+        .humidity { font-size: 2.5rem; font-weight: normal; margin-top: 10px; }
+        .advice-box { border: 5px solid #000; border-radius: 15px; padding: 20px; margin: 10px 20px; text-align: left; font-weight: bold; }
+        .advice-item { font-size: 2.0rem; margin: 15px 0; display: flex; align-items: center; padding: 0 10px; }
+        .text-icon { font-size: 2.0rem; margin-right: 15px; min-width: 0; width: auto; text-align: center; font-weight: normal; white-space: nowrap; }
+        #umbrellaText, #clothesText { word-break: break-all; flex: 1; }
     </style>
 </head>
 <body>
@@ -145,17 +69,15 @@
     <script>
         async function fetchWeather() {
             try {
-                // タップした時に反応がわかるよう「更新中...」と表示
+                // 更新が走った瞬間に右上の表示を「更新中...」に変える
                 const updateTimeEl = document.getElementById('updateTime');
                 updateTimeEl.innerText = "更新中...";
 
-                // 【超重要】キャッシュバスター（毎回違うランダムな数字でサボりを防止）
+                // キャッシュバスター
                 const uniqueTime = new Date().getTime();
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
-                // 【対策】気温バグを回避するため、24時間正確な「Open-Meteo」から最高・最低気温も取得
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
-                // 1. 気象庁からお天気テキストを取得
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -189,7 +111,6 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 2. Open-Meteoから気温と湿度を取得
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -217,7 +138,7 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
-                // すべての処理が終わったら更新時間を書き換える
+                // 処理が終わったら更新時間を書き換える
                 updateTimeEl.innerText = `${h}:${m} 更新`;
 
             } catch (error) {
@@ -229,13 +150,9 @@
         // 初回読み込み
         fetchWeather();
 
-        // 【機能1：定時更新】起きている間は10分（600000ミリ秒）ごとに自動更新
-        setInterval(fetchWeather, 600000);
-
-        // 【機能2：どこでもタップ更新】画面のどこを触っても即座に最新情報を取得！
-        document.body.addEventListener('click', () => {
-            fetchWeather();
-        });
+        // 【テスト用】30秒（30000ミリ秒）ごとに自動更新
+        // ※テストが終わったら 600000 (10分) などに変更してください
+        setInterval(fetchWeather, 30000);
 
         // 念のための全体リロード（6時間おき）
         setTimeout(() => {
