@@ -69,15 +69,15 @@
     <script>
         async function fetchWeather() {
             try {
-                // 更新が走った瞬間に右上の表示を「更新中...」に変える
                 const updateTimeEl = document.getElementById('updateTime');
                 updateTimeEl.innerText = "更新中...";
 
-                // キャッシュバスター
+                // キャッシュバスター（Kindleブラウザに最新データを強制取得させる）
                 const uniqueTime = new Date().getTime();
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
+                // 1. 気象庁から天気を取得
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -111,6 +111,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
+                // 2. Open-Meteoから気温と湿度を取得
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -138,7 +139,6 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
-                // 処理が終わったら更新時間を書き換える
                 updateTimeEl.innerText = `${h}:${m} 更新`;
 
             } catch (error) {
@@ -147,12 +147,10 @@
             }
         }
 
-        // 初回読み込み
         fetchWeather();
 
-        // 【テスト用】30秒（30000ミリ秒）ごとに自動更新
-        // ※テストが終わったら 600000 (10分) などに変更してください
-        setInterval(fetchWeather, 10800000);
+        // 【本番設定】1時間（3600000ミリ秒）ごとに自動更新
+        setInterval(fetchWeather, 3600000);
 
         // 念のための全体リロード（6時間おき）
         setTimeout(() => {
