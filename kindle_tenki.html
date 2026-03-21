@@ -1,151 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="10800">
-    <title>Nyanko Portal Kindle</title>
-    <style>
-        body {
-            background-color: #ffffff;
-            color: #000000;
-            font-family: sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0; 
-        }
-
-        .header-container {
-            margin-top: 30px; 
-            padding: 0 10px;
-        }
-        
-        .header {
-            display: flex;
-            flex-direction: column;
-            align-items: center; 
-            border-bottom: 3px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 30px; 
-        }
-
-        .date {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin-bottom: 20px; 
-        }
-        
-        .time {
-            font-size: 1.5rem;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .main-content {
-            padding: 0 10px;
-        }
-        
-        .weather {
-            font-size: 4rem;
-            font-weight: bold;
-            margin: 20px 0;
-            line-height: 1.2;
-        }
-        
-        .temp-container {
-            margin-bottom: 30px;
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            line-height: 1.2;
-        }
-
-        .temp {
-            font-size: 4rem; 
-            font-weight: bold;
-        }
-
-        .humidity {
-            font-size: 2.5rem; 
-            font-weight: normal;
-            margin-top: 10px;
-        }
-
-        .advice-box {
-            border: 5px solid #000;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 10px 20px;
-            text-align: left;
-            font-weight: bold;
-        }
-        
-        .advice-item {
-            font-size: 2.0rem; 
-            margin: 15px 0;
-            display: flex; 
-            align-items: center; 
-            padding: 0 10px; 
-        }
-        
-        .text-icon {
-            font-size: 2.0rem; 
-            margin-right: 15px; 
-            min-width: 0; 
-            width: auto; 
-            text-align: center;
-            font-weight: normal; 
-            white-space: nowrap; 
-        }
-
-        #umbrellaText, #clothesText {
-            word-break: break-all; 
-            flex: 1; 
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header-container">
-        <div class="header">
-            <div class="date" id="dateText">----年(令和-年) -月-日(-)</div>
-            <div class="time" id="updateTime">--:-- 更新</div>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <div class="weather" id="weatherText">読込中...</div>
-        
-        <div class="temp-container">
-            <div class="temp">
-                <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
-            </div>
-            <div class="humidity" id="humidityText">
-                (湿度 --%)
-            </div>
-        </div>
-
-        <div class="advice-box">
-            <div class="advice-item">
-                <span class="text-icon">[雨傘]</span>
-                <span id="umbrellaText">確認中...</span>
-            </div>
-            <div class="advice-item">
-                <span class="text-icon">[服装]</span>
-                <span id="clothesText">確認中...</span>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
         const formatter = new Intl.DateTimeFormat('ja-JP', options);
 
         const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
-        const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&timezone=Asia%2FTokyo";
+        // ★変更点：Open-Meteoから最高気温と最低気温も取得するようにURLを変更
+        const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo";
 
         async function fetchWeather() {
             try {
+                // 1. 気象庁からお天気テキストを取得
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -179,31 +41,34 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                const temps = data[0].timeSeries[2].areas[0].temps;
-                let maxT = 20; 
-                if(temps.length >= 2) {
-                    const t1 = parseInt(temps[0]);
-                    const t2 = parseInt(temps[1]);
-                    document.getElementById('minTemp').innerText = Math.min(t1, t2);
-                    maxT = Math.max(t1, t2);
-                    document.getElementById('maxTemp').innerText = maxT;
-                }
-
-                let clothesMsg = "";
-                if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
-                else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
-                else if (maxT >= 15) { clothesMsg = "上着を持っていこう！"; } 
-                else if (maxT >= 10) { clothesMsg = "セーターかコートを着てね！"; } 
-                else { clothesMsg = "ダウンや手ぶくろで暖かく！"; }
-                document.getElementById('clothesText').innerText = clothesMsg;
-
+                // 2. Open-Meteoから気温と湿度を取得（★気象庁の配列バグ対策）
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
+                    
                     const humidity = meteoData.current.relative_humidity_2m;
                     document.getElementById('humidityText').innerText = `(湿度 ${humidity}%)`;
+
+                    // 今日の最低・最高気温（小数点四捨五入）
+                    const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
+                    const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
+                    
+                    document.getElementById('minTemp').innerText = minT;
+                    document.getElementById('maxTemp').innerText = maxT;
+
+                    // 服装アドバイス（maxTを使う）
+                    let clothesMsg = "";
+                    if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
+                    else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
+                    else if (maxT >= 15) { clothesMsg = "上着を持っていこう！"; } 
+                    else if (maxT >= 10) { clothesMsg = "セーターかコートを着てね！"; } 
+                    else { clothesMsg = "ダウンや手ぶくろで暖かく！"; }
+                    document.getElementById('clothesText').innerText = clothesMsg;
+
                 } catch (e) {
                     document.getElementById('humidityText').innerText = "(湿度 --%)";
+                    document.getElementById('minTemp').innerText = "--";
+                    document.getElementById('maxTemp').innerText = "--";
                 }
 
             } catch (error) {
@@ -214,18 +79,18 @@
         // 初回読み込み
         fetchWeather();
 
-        // --- 魔法の数行（ふたを開けた時に実行） ---
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                fetchWeather(); // 画面が見えるようになったら最新情報を取得
+        // ★変更点：古いKindleでも確実にスリープ復帰を検知するタイムワープ（ハートビート）作戦
+        let lastTime = Date.now();
+        setInterval(() => {
+            const currentTime = Date.now();
+            // 5秒ごとに時間をチェック。もし前回から「60秒以上」ワープしていたら、スリープから目覚めたと判断して更新！
+            if (currentTime - lastTime > 60000) {
+                fetchWeather(); 
             }
-        });
+            lastTime = currentTime;
+        }, 5000);
 
-        // 【エコ設定】JavaScriptでも3時間（10800000ミリ秒）後に強制リロード
+        // 念のためのエコ更新（3時間）
         setTimeout(() => {
             window.location.reload();
-        }, 10800000); 
-
-    </script>
-</body>
-</html>
+        }, 10800000);
