@@ -211,7 +211,15 @@
             }
         }
 
+        // 初回読み込み
         fetchWeather();
+
+        // --- 魔法の数行（ふたを開けた時に実行） ---
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                fetchWeather(); // 画面が見えるようになったら最新情報を取得
+            }
+        });
 
         // 【エコ設定】JavaScriptでも3時間（10800000ミリ秒）後に強制リロード
         setTimeout(() => {
