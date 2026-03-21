@@ -173,8 +173,8 @@
         // 初回読み込み
         fetchWeather();
 
-        // 【実運用：1時間更新】3,600,000ミリ秒ごとに自動実行
-        setInterval(fetchWeather, 3600000);
+        // 【実運用：2時間更新】7,200,000ミリ秒ごとに自動実行
+        setInterval(fetchWeather, 7200000);
 
         // 念のための全体リロード（6時間おき）
         setTimeout(() => {
