@@ -141,18 +141,12 @@
         const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
         const formatter = new Intl.DateTimeFormat('ja-JP', options);
 
-        const jmaUrl = "[https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json](https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json)";
-        const meteoUrl = "[https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo](https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo)";
+        const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
+        const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&timezone=Asia%2FTokyo";
 
         async function fetchWeather() {
             try {
-                // 【超重要】Kindleブラウザにサボらせないための「キャッシュバスター（毎回違うランダムな数字）」
-                const uniqueTime = new Date().getTime();
-                const jmaNoCache = jmaUrl + "?_=" + uniqueTime;
-                const meteoNoCache = meteoUrl + "&_=" + uniqueTime;
-
-                // 1. 気象庁からお天気テキストを取得（ランダム数字付きURLを使用）
-                const response = await fetch(jmaNoCache);
+                const response = await fetch(jmaUrl);
                 const data = await response.json();
 
                 const parts = formatter.formatToParts(new Date());
@@ -185,32 +179,31 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 2. Open-Meteoから気温と湿度を取得（ランダム数字付きURLを使用）
+                const temps = data[0].timeSeries[2].areas[0].temps;
+                let maxT = 20; 
+                if(temps.length >= 2) {
+                    const t1 = parseInt(temps[0]);
+                    const t2 = parseInt(temps[1]);
+                    document.getElementById('minTemp').innerText = Math.min(t1, t2);
+                    maxT = Math.max(t1, t2);
+                    document.getElementById('maxTemp').innerText = maxT;
+                }
+
+                let clothesMsg = "";
+                if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
+                else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
+                else if (maxT >= 15) { clothesMsg = "上着を持っていこう！"; } 
+                else if (maxT >= 10) { clothesMsg = "セーターかコートを着てね！"; } 
+                else { clothesMsg = "ダウンや手ぶくろで暖かく！"; }
+                document.getElementById('clothesText').innerText = clothesMsg;
+
                 try {
-                    const meteoRes = await fetch(meteoNoCache);
+                    const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
-                    
                     const humidity = meteoData.current.relative_humidity_2m;
                     document.getElementById('humidityText').innerText = `(湿度 ${humidity}%)`;
-
-                    const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
-                    const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
-                    
-                    document.getElementById('minTemp').innerText = minT;
-                    document.getElementById('maxTemp').innerText = maxT;
-
-                    let clothesMsg = "";
-                    if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
-                    else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
-                    else if (maxT >= 15) { clothesMsg = "上着を持っていこう！"; } 
-                    else if (maxT >= 10) { clothesMsg = "セーターかコートを着てね！"; } 
-                    else { clothesMsg = "ダウンや手ぶくろで暖かく！"; }
-                    document.getElementById('clothesText').innerText = clothesMsg;
-
                 } catch (e) {
                     document.getElementById('humidityText').innerText = "(湿度 --%)";
-                    document.getElementById('minTemp').innerText = "--";
-                    document.getElementById('maxTemp').innerText = "--";
                 }
 
             } catch (error) {
@@ -221,24 +214,14 @@
         // 初回読み込み
         fetchWeather();
 
-        // 【復帰検知1】画面が表示された瞬間（最新ブラウザ用）
+        // --- 魔法の数行（ふたを開けた時に実行） ---
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
-                fetchWeather(); 
+                fetchWeather(); // 画面が見えるようになったら最新情報を取得
             }
         });
 
-        // 【復帰検知2】タイムワープ検知（古いKindle用：60秒以上スリープしていたら更新）
-        let lastTime = Date.now();
-        setInterval(() => {
-            const currentTime = Date.now();
-            if (currentTime - lastTime > 60000) {
-                fetchWeather(); 
-            }
-            lastTime = currentTime;
-        }, 5000);
-
-        // 念のためのエコ更新（3時間）
+        // 【エコ設定】JavaScriptでも3時間（10800000ミリ秒）後に強制リロード
         setTimeout(() => {
             window.location.reload();
         }, 10800000); 
