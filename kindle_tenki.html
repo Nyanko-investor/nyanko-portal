@@ -14,6 +14,7 @@
             margin: 0;
             padding: 10px;
         }
+        /* ヘッダー（日付と更新時間） */
         .header {
             display: flex;
             justify-content: space-between;
@@ -22,16 +23,19 @@
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
+        /* 文字数が増えたので少しだけサイズを調整 */
         .date {
-            font-size: 3rem;
+            font-size: 2.2rem;
             font-weight: bold;
         }
         .time {
             font-size: 1.5rem;
             font-weight: bold;
+            white-space: nowrap; /* 更新時間が改行されるのを防ぐ */
         }
+        /* メインの天気（5rem → 4rem に少し縮小） */
         .weather {
-            font-size: 5rem;
+            font-size: 4rem;
             font-weight: bold;
             margin: 20px 0;
             line-height: 1.2;
@@ -41,6 +45,7 @@
             font-weight: bold;
             margin-bottom: 30px;
         }
+        /* アドバイスのボックス */
         .advice-box {
             border: 5px solid #000;
             border-radius: 15px;
@@ -55,18 +60,20 @@
             display: flex;
             align-items: center;
         }
-        .icon {
-            font-size: 3rem;
+        /* 文字アイコンの部分（[傘] [服装]） */
+        .text-icon {
+            font-size: 2rem;
             margin-right: 15px;
-            min-width: 50px;
+            min-width: 80px;
             text-align: center;
+            font-weight: normal;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="date" id="dateText">--月--日</div>
+        <div class="date" id="dateText">----年(令和-年) -月-日(-)</div>
         <div class="time" id="updateTime">--:-- 更新</div>
     </div>
 
@@ -77,12 +84,12 @@
 
     <div class="advice-box">
         <div class="advice-item">
-            <span class="icon">🌂</span>
-            <span id="umbrellaText">傘の確認中...</span>
+            <span class="text-icon">[傘]</span>
+            <span id="umbrellaText">確認中...</span>
         </div>
         <div class="advice-item">
-            <span class="icon">👕</span>
-            <span id="clothesText">服装の確認中...</span>
+            <span class="text-icon">[服装]</span>
+            <span id="clothesText">確認中...</span>
         </div>
     </div>
 
@@ -94,30 +101,34 @@
                 const response = await fetch(url);
                 const data = await response.json();
 
-                // 1. 日付と更新時間
+                // 1. 日付（西暦・和暦・曜日）と更新時間のセット
                 const now = new Date();
-                document.getElementById('dateText').innerText = `${now.getMonth() + 1}月${now.getDate()}日`;
+                
+                const year = now.getFullYear();
+                const reiwa = year - 2018; // 令和の計算
+                const days = ['日', '月', '火', '水', '木', '金', '土'];
+                const dayStr = days[now.getDay()];
+                
+                document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${now.getMonth() + 1}月${now.getDate()}日(${dayStr})`;
                 
                 const h = String(now.getHours()).padStart(2, '0');
                 const m = String(now.getMinutes()).padStart(2, '0');
                 document.getElementById('updateTime').innerText = `${h}:${m} 更新`;
 
-                // 2. 天気テキストの取得と調整
-                // 晴(小2)、雨(小1)、雪(小2)、一時(小1/小2)はそのまま。曇(中学生)だけ「くもり」に置換。
+                // 2. 天気テキストの取得と小学校漢字への調整
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ')
                                              .replace(/曇り/g, 'くもり');
                 document.getElementById('weatherText').innerText = cleanWeather;
 
                 // 3. 傘のアドバイス
-                // 忘(小6)、持(小3)、今(小2)、日(小1)を使用
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
                     document.getElementById('umbrellaText').innerText = "忘れないで持っていこう！";
                 } else {
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 4. 気温と服装アドバイス
+                // 4. 気温の取得と服装アドバイス
                 const temps = data[0].timeSeries[2].areas[0].temps;
                 let maxT = 20; 
                 
@@ -129,7 +140,6 @@
                     document.getElementById('maxTemp').innerText = maxT;
                 }
 
-                // 半(小2)、長(小2)、上(小1)、着(小3)、暖(小6)を使用。袖(中学生)と袋(中学生)は平仮名。
                 let clothesMsg = "";
                 if (maxT >= 25) {
                     clothesMsg = "半そでがいいね！";
