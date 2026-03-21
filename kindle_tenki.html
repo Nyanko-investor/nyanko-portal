@@ -52,10 +52,24 @@
             line-height: 1.2;
         }
         
-        .temp {
-            font-size: 4rem;
-            font-weight: bold;
+        /* 気温と湿度のコンテナ */
+        .temp-container {
             margin-bottom: 30px;
+            display: flex;
+            flex-direction: column; /* Kindleの画面幅を考慮し、バランス良く配置 */
+            align-items: center;
+            line-height: 1.2;
+        }
+
+        .temp {
+            font-size: 4rem; /* 気温は大きく */
+            font-weight: bold;
+        }
+
+        .humidity {
+            font-size: 2.5rem; /* 湿度は少し控えめに */
+            font-weight: normal;
+            margin-top: 10px;
         }
 
         .advice-box {
@@ -82,10 +96,10 @@
             width: auto; 
             text-align: center;
             font-weight: normal; 
-            white-space: nowrap; /* アイコンが改行されないように */
+            white-space: nowrap; 
         }
 
-        #umbrellaText, #clothesText, #humidityText {
+        #umbrellaText, #clothesText {
             word-break: break-all; 
             flex: 1; 
         }
@@ -102,8 +116,14 @@
 
     <div class="main-content">
         <div class="weather" id="weatherText">読込中...</div>
-        <div class="temp">
-            <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
+        
+        <div class="temp-container">
+            <div class="temp">
+                <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
+            </div>
+            <div class="humidity" id="humidityText">
+                (湿度 --%)
+            </div>
         </div>
 
         <div class="advice-box">
@@ -115,10 +135,6 @@
                 <span class="text-icon">[服装]</span>
                 <span id="clothesText">確認中...</span>
             </div>
-            <div class="advice-item">
-                <span class="text-icon">[湿度]</span>
-                <span id="humidityText">確認中...</span>
-            </div>
         </div>
     </div>
 
@@ -126,13 +142,11 @@
         const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
         const formatter = new Intl.DateTimeFormat('ja-JP', options);
 
-        // 気象庁（天気・気温）とOpen-Meteo（湿度）の2つのAPIを準備
         const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
         const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&timezone=Asia%2FTokyo";
 
         async function fetchWeather() {
             try {
-                // 1. 気象庁APIの処理（今まで通り）
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -156,13 +170,10 @@
                                              .replace(/曇り/g, 'くもり');
                 document.getElementById('weatherText').innerText = cleanWeather;
 
-                // 【アップデート】折りたたみ傘のロジック
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
-                    // 天気の中に「一時」「のち」「ところにより」が含まれていたら折りたたみ
                     if (cleanWeather.includes('一時') || cleanWeather.includes('のち') || cleanWeather.includes('ところにより')) {
                         document.getElementById('umbrellaText').innerText = "折りたたみかさがあると安心！";
                     } else {
-                        // ガッツリ雨の予報なら長い傘
                         document.getElementById('umbrellaText').innerText = "忘れないで持っていこう！";
                     }
                 } else {
@@ -187,22 +198,13 @@
                 else { clothesMsg = "ダウンや手ぶくろで暖かく！"; }
                 document.getElementById('clothesText').innerText = clothesMsg;
 
-                // 2. Open-Meteo APIからの湿度取得処理
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
                     const humidity = meteoData.current.relative_humidity_2m;
-                    
-                    // 湿度に合わせて一言アドバイスも追加
-                    let humidMsg = `いま ${humidity} ％`;
-                    if (humidity < 40) {
-                        humidMsg += "（かんそう 注意！）";
-                    } else if (humidity > 70) {
-                        humidMsg += "（ジメジメ 注意！）";
-                    }
-                    document.getElementById('humidityText').innerText = humidMsg;
+                    document.getElementById('humidityText').innerText = `(湿度 ${humidity}%)`;
                 } catch (e) {
-                    document.getElementById('humidityText').innerText = "取得エラー";
+                    document.getElementById('humidityText').innerText = "(湿度 --%)";
                 }
 
             } catch (error) {
