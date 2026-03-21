@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="10800">
+    <meta http-equiv="refresh" content="21600">
     <title>Nyanko Portal Kindle</title>
     <style>
         body {
@@ -13,6 +13,10 @@
             text-align: center;
             margin: 0;
             padding: 0; 
+            /* 画面のどこをタップしても反応するように高さを確保 */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .header-container {
@@ -43,6 +47,7 @@
 
         .main-content {
             padding: 0 10px;
+            flex-grow: 1; /* タップ領域を広げる */
         }
         
         .weather {
@@ -140,12 +145,17 @@
     <script>
         async function fetchWeather() {
             try {
-                // 【対策1】URLの最後に「今の時間の数字」をくっつけて、Kindleのサボり（キャッシュ）を強制リセット
-                const nowStr = new Date().getTime();
-                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + nowStr;
-                // 【対策2】気温バグを直すため、24時間正確な「Open-Meteo」から最高・最低気温も取得するURLに変更
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + nowStr;
+                // タップした時に反応がわかるよう「更新中...」と表示
+                const updateTimeEl = document.getElementById('updateTime');
+                updateTimeEl.innerText = "更新中...";
 
+                // 【超重要】キャッシュバスター（毎回違うランダムな数字でサボりを防止）
+                const uniqueTime = new Date().getTime();
+                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
+                // 【対策】気温バグを回避するため、24時間正確な「Open-Meteo」から最高・最低気温も取得
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
+
+                // 1. 気象庁からお天気テキストを取得
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -164,8 +174,7 @@
                 const dayStr = days[dateObj.getDay()];
                 
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
-                document.getElementById('updateTime').innerText = `${h}:${m} 更新`;
-
+                
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり');
                 document.getElementById('weatherText').innerText = cleanWeather;
@@ -180,7 +189,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 【対策2の続き】気象庁ではなく、Open-Meteoのデータを使って気温を表示する
+                // 2. Open-Meteoから気温と湿度を取得
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -208,36 +217,30 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
+                // すべての処理が終わったら更新時間を書き換える
+                updateTimeEl.innerText = `${h}:${m} 更新`;
+
             } catch (error) {
                 document.getElementById('weatherText').innerText = "エラーが起きたよ";
+                document.getElementById('updateTime').innerText = "更新失敗";
             }
         }
 
         // 初回読み込み
         fetchWeather();
 
-        // 魔法の1行：ふたを開けた時に実行（最新ブラウザ用）
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                fetchWeather(); 
-            }
+        // 【機能1：定時更新】起きている間は10分（600000ミリ秒）ごとに自動更新
+        setInterval(fetchWeather, 600000);
+
+        // 【機能2：どこでもタップ更新】画面のどこを触っても即座に最新情報を取得！
+        document.body.addEventListener('click', () => {
+            fetchWeather();
         });
 
-        // 【対策3】魔法の数行：タイムワープ検知（Kindleの古いブラウザ用）
-        let lastTime = Date.now();
-        setInterval(() => {
-            const currentTime = Date.now();
-            // 5秒ごとに時間をチェックし、60秒以上ワープ（スリープ）していたら更新
-            if (currentTime - lastTime > 60000) {
-                fetchWeather(); 
-            }
-            lastTime = currentTime;
-        }, 5000);
-
-        // エコ設定（3時間後に強制リロード）
+        // 念のための全体リロード（6時間おき）
         setTimeout(() => {
             window.location.reload();
-        }, 10800000); 
+        }, 21600000); 
 
     </script>
 </body>
