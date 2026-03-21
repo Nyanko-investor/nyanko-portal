@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="3600">
+    <meta http-equiv="refresh" content="60">
     <title>Nyanko Portal Kindle</title>
     <style>
         body {
@@ -52,22 +52,21 @@
             line-height: 1.2;
         }
         
-        /* 気温と湿度のコンテナ */
         .temp-container {
             margin-bottom: 30px;
             display: flex;
-            flex-direction: column; /* Kindleの画面幅を考慮し、バランス良く配置 */
+            flex-direction: column; 
             align-items: center;
             line-height: 1.2;
         }
 
         .temp {
-            font-size: 4rem; /* 気温は大きく */
+            font-size: 4rem; 
             font-weight: bold;
         }
 
         .humidity {
-            font-size: 2.5rem; /* 湿度は少し控えめに */
+            font-size: 2.5rem; 
             font-weight: normal;
             margin-top: 10px;
         }
@@ -82,7 +81,7 @@
         }
         
         .advice-item {
-            font-size: 2.5rem; 
+            font-size: 2.0rem; 
             margin: 15px 0;
             display: flex; 
             align-items: center; 
@@ -90,7 +89,7 @@
         }
         
         .text-icon {
-            font-size: 2.5rem; 
+            font-size: 2.0rem; 
             margin-right: 15px; 
             min-width: 0; 
             width: auto; 
@@ -213,6 +212,12 @@
         }
 
         fetchWeather();
+
+        // 【テスト用】JavaScriptでも60秒（60000ミリ秒）後に強制リロード
+        setTimeout(() => {
+            window.location.reload();
+        }, 60000); 
+
     </script>
 </body>
 </html>
