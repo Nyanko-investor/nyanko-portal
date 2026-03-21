@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="3600">
+    <title>Nyanko Portal Kindle</title>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .date {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        .time {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .weather {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            line-height: 1.2;
+        }
+        .temp {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .advice-box {
+            border: 5px solid #000;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 20px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .advice-item {
+            font-size: 2.5rem;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+        }
+        .icon {
+            font-size: 3rem;
+            margin-right: 15px;
+            min-width: 50px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="date" id="dateText">--月--日</div>
+        <div class="time" id="updateTime">--:-- 更新</div>
+    </div>
+
+    <div class="weather" id="weatherText">読込中...</div>
+    <div class="temp">
+        <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
+    </div>
+
+    <div class="advice-box">
+        <div class="advice-item">
+            <span class="icon">🌂</span>
+            <span id="umbrellaText">傘の確認中...</span>
+        </div>
+        <div class="advice-item">
+            <span class="icon">👕</span>
+            <span id="clothesText">服装の確認中...</span>
+        </div>
+    </div>
+
+    <script>
+        const url = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
+
+        async function fetchWeather() {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                // 1. 日付と更新時間
+                const now = new Date();
+                document.getElementById('dateText').innerText = `${now.getMonth() + 1}月${now.getDate()}日`;
+                
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('updateTime').innerText = `${h}:${m} 更新`;
+
+                // 2. 天気テキストの取得と調整
+                // 晴(小2)、雨(小1)、雪(小2)、一時(小1/小2)はそのまま。曇(中学生)だけ「くもり」に置換。
+                let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
+                let cleanWeather = rawWeather.replace(/　/g, ' ')
+                                             .replace(/曇り/g, 'くもり');
+                document.getElementById('weatherText').innerText = cleanWeather;
+
+                // 3. 傘のアドバイス
+                // 忘(小6)、持(小3)、今(小2)、日(小1)を使用
+                if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
+                    document.getElementById('umbrellaText').innerText = "忘れないで持っていこう！";
+                } else {
+                    document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
+                }
+
+                // 4. 気温と服装アドバイス
+                const temps = data[0].timeSeries[2].areas[0].temps;
+                let maxT = 20; 
+                
+                if(temps.length >= 2) {
+                    const t1 = parseInt(temps[0]);
+                    const t2 = parseInt(temps[1]);
+                    document.getElementById('minTemp').innerText = Math.min(t1, t2);
+                    maxT = Math.max(t1, t2);
+                    document.getElementById('maxTemp').innerText = maxT;
+                }
+
+                // 半(小2)、長(小2)、上(小1)、着(小3)、暖(小6)を使用。袖(中学生)と袋(中学生)は平仮名。
+                let clothesMsg = "";
+                if (maxT >= 25) {
+                    clothesMsg = "半そでがいいね！";
+                } else if (maxT >= 20) {
+                    clothesMsg = "長そでのシャツがピッタリ！";
+                } else if (maxT >= 15) {
+                    clothesMsg = "上着を持っていこう！";
+                } else if (maxT >= 10) {
+                    clothesMsg = "セーターかコートを着てね！";
+                } else {
+                    clothesMsg = "ダウンや手ぶくろで暖かく！";
+                }
+                document.getElementById('clothesText').innerText = clothesMsg;
+
+            } catch (error) {
+                document.getElementById('weatherText').innerText = "エラーが起きたよ";
+            }
+        }
+
+        fetchWeather();
+    </script>
+</body>
+</html>
