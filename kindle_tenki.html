@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="21600">
+    <meta http-equiv="refresh" content="10800">
     <title>Nyanko Portal Kindle</title>
     <style>
         body {
@@ -13,24 +13,95 @@
             text-align: center;
             margin: 0;
             padding: 0; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
-        .header-container { margin-top: 30px; padding: 0 10px; }
-        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 30px; }
-        .date { font-size: 2.2rem; font-weight: bold; margin-bottom: 20px; }
-        .time { font-size: 1.5rem; font-weight: bold; white-space: nowrap; }
-        .main-content { padding: 0 10px; flex-grow: 1; }
-        .weather { font-size: 4rem; font-weight: bold; margin: 20px 0; line-height: 1.2; }
-        .temp-container { margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
-        .temp { font-size: 4rem; font-weight: bold; }
-        .humidity { font-size: 2.5rem; font-weight: normal; margin-top: 10px; }
-        .advice-box { border: 5px solid #000; border-radius: 15px; padding: 20px; margin: 10px 20px; text-align: left; font-weight: bold; }
-        .advice-item { font-size: 2.0rem; margin: 15px 0; display: flex; align-items: center; padding: 0 10px; }
-        .text-icon { font-size: 2.0rem; margin-right: 15px; min-width: 0; width: auto; text-align: center; font-weight: normal; white-space: nowrap; }
-        #umbrellaText, #clothesText { word-break: break-all; flex: 1; }
+        .header-container {
+            margin-top: 30px; 
+            padding: 0 10px;
+        }
+        
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 30px; 
+        }
+
+        .date {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 20px; 
+        }
+        
+        .time {
+            font-size: 1.5rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .main-content {
+            padding: 0 10px;
+        }
+        
+        .weather {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 20px 0;
+            line-height: 1.2;
+        }
+        
+        .temp-container {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            line-height: 1.2;
+        }
+
+        .temp {
+            font-size: 4rem; 
+            font-weight: bold;
+        }
+
+        .humidity {
+            font-size: 2.5rem; 
+            font-weight: normal;
+            margin-top: 10px;
+        }
+
+        .advice-box {
+            border: 5px solid #000;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 20px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .advice-item {
+            font-size: 2.0rem; 
+            margin: 15px 0;
+            display: flex; 
+            align-items: center; 
+            padding: 0 10px; 
+        }
+        
+        .text-icon {
+            font-size: 2.0rem; 
+            margin-right: 15px; 
+            min-width: 0; 
+            width: auto; 
+            text-align: center;
+            font-weight: normal; 
+            white-space: nowrap; 
+        }
+
+        #umbrellaText, #clothesText {
+            word-break: break-all; 
+            flex: 1; 
+        }
     </style>
 </head>
 <body>
@@ -69,15 +140,12 @@
     <script>
         async function fetchWeather() {
             try {
-                const updateTimeEl = document.getElementById('updateTime');
-                updateTimeEl.innerText = "更新中...";
+                // 【対策1】URLの最後に「今の時間の数字」をくっつけて、Kindleのサボり（キャッシュ）を強制リセット
+                const nowStr = new Date().getTime();
+                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + nowStr;
+                // 【対策2】気温バグを直すため、24時間正確な「Open-Meteo」から最高・最低気温も取得するURLに変更
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + nowStr;
 
-                // キャッシュバスター（Kindleブラウザに最新データを強制取得させる）
-                const uniqueTime = new Date().getTime();
-                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
-
-                // 1. 気象庁から天気を取得
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -96,7 +164,8 @@
                 const dayStr = days[dateObj.getDay()];
                 
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
-                
+                document.getElementById('updateTime').innerText = `${h}:${m} 更新`;
+
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり');
                 document.getElementById('weatherText').innerText = cleanWeather;
@@ -111,7 +180,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 2. Open-Meteoから気温と湿度を取得
+                // 【対策2の続き】気象庁ではなく、Open-Meteoのデータを使って気温を表示する
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -139,23 +208,36 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
-                updateTimeEl.innerText = `${h}:${m} 更新`;
-
             } catch (error) {
                 document.getElementById('weatherText').innerText = "エラーが起きたよ";
-                document.getElementById('updateTime').innerText = "更新失敗";
             }
         }
 
+        // 初回読み込み
         fetchWeather();
 
-        // 【本番設定】1時間（3600000ミリ秒）ごとに自動更新
-        setInterval(fetchWeather, 3600000);
+        // 魔法の1行：ふたを開けた時に実行（最新ブラウザ用）
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                fetchWeather(); 
+            }
+        });
 
-        // 念のための全体リロード（6時間おき）
+        // 【対策3】魔法の数行：タイムワープ検知（Kindleの古いブラウザ用）
+        let lastTime = Date.now();
+        setInterval(() => {
+            const currentTime = Date.now();
+            // 5秒ごとに時間をチェックし、60秒以上ワープ（スリープ）していたら更新
+            if (currentTime - lastTime > 60000) {
+                fetchWeather(); 
+            }
+            lastTime = currentTime;
+        }, 5000);
+
+        // エコ設定（3時間後に強制リロード）
         setTimeout(() => {
             window.location.reload();
-        }, 21600000); 
+        }, 10800000); 
 
     </script>
 </body>
