@@ -15,7 +15,6 @@
             padding: 0; 
         }
 
-        /* --- ヘッダー部分のレイアウト（今のまま維持） --- */
         .header-container {
             margin-top: 30px; 
             padding: 0 10px;
@@ -42,7 +41,6 @@
             white-space: nowrap;
         }
 
-        /* --- メインコンテンツ（今のまま維持） --- */
         .main-content {
             padding: 0 10px;
         }
@@ -60,7 +58,6 @@
             margin-bottom: 30px;
         }
 
-        /* --- アドバイスボックス（イマイチの解消） --- */
         .advice-box {
             border: 5px solid #000;
             border-radius: 15px;
@@ -74,27 +71,23 @@
             font-size: 2.5rem; 
             margin: 15px 0;
             display: flex; 
-            align-items: center; /* 縦方向は中央揃え */
-            /* 全体を少し中央寄りに */
+            align-items: center; 
             padding: 0 10px; 
         }
         
         .text-icon {
-            /* フォントサイズをメッセージと同じに */
             font-size: 2.5rem; 
-            /* アイコンとメッセージの間の空白（今のまま維持） */
             margin-right: 15px; 
-            /* 【修正】min-widthを撤廃。幅を固定しない */
             min-width: 0; 
             width: auto; 
             text-align: center;
             font-weight: normal; 
+            white-space: nowrap; /* アイコンが改行されないように */
         }
 
-        /* 【追加】メッセージ部分（はみ出し防止と改行） */
-        #umbrellaText, #clothesText {
-            word-break: break-all; /* 文字がはみ出すのを防ぐ */
-            flex: 1; /* 残りの幅をすべて使い、改行を許可する */
+        #umbrellaText, #clothesText, #humidityText {
+            word-break: break-all; 
+            flex: 1; 
         }
     </style>
 </head>
@@ -122,31 +115,34 @@
                 <span class="text-icon">[服装]</span>
                 <span id="clothesText">確認中...</span>
             </div>
+            <div class="advice-item">
+                <span class="text-icon">[湿度]</span>
+                <span id="humidityText">確認中...</span>
+            </div>
         </div>
     </div>
 
     <script>
-        // 日本時間（Asia/Tokyo）に固定するためのDateTimeFormatのオプション
         const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
         const formatter = new Intl.DateTimeFormat('ja-JP', options);
 
-        const url = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
+        // 気象庁（天気・気温）とOpen-Meteo（湿度）の2つのAPIを準備
+        const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
+        const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&timezone=Asia%2FTokyo";
 
         async function fetchWeather() {
             try {
-                const response = await fetch(url);
+                // 1. 気象庁APIの処理（今まで通り）
+                const response = await fetch(jmaUrl);
                 const data = await response.json();
 
-                // 【修正】KindleのUTC問題を回避し、日本時間を強制取得
                 const parts = formatter.formatToParts(new Date());
-
                 const year = parseInt(parts.find(p => p.type === 'year').value);
                 const month = parseInt(parts.find(p => p.type === 'month').value);
                 const day = parseInt(parts.find(p => p.type === 'day').value);
                 const h = parts.find(p => p.type === 'hour').value;
                 const m = parts.find(p => p.type === 'minute').value;
 
-                // 日付（和暦と曜日）の計算
                 const dateObj = new Date(year, month - 1, day);
                 const reiwa = year - 2018; 
                 const days = ['日', '月', '火', '水', '木', '金', '土'];
@@ -155,23 +151,26 @@
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
                 document.getElementById('updateTime').innerText = `${h}:${m} 更新`;
 
-                // 天気テキストの取得と小学校漢字への調整
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ')
                                              .replace(/曇り/g, 'くもり');
                 document.getElementById('weatherText').innerText = cleanWeather;
 
-                // 傘のアドバイス
+                // 【アップデート】折りたたみ傘のロジック
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
-                    document.getElementById('umbrellaText').innerText = "忘れないで持っていこう！";
+                    // 天気の中に「一時」「のち」「ところにより」が含まれていたら折りたたみ
+                    if (cleanWeather.includes('一時') || cleanWeather.includes('のち') || cleanWeather.includes('ところにより')) {
+                        document.getElementById('umbrellaText').innerText = "折りたたみかさがあると安心！";
+                    } else {
+                        // ガッツリ雨の予報なら長い傘
+                        document.getElementById('umbrellaText').innerText = "忘れないで持っていこう！";
+                    }
                 } else {
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 気温の取得と服装アドバイス
                 const temps = data[0].timeSeries[2].areas[0].temps;
                 let maxT = 20; 
-                
                 if(temps.length >= 2) {
                     const t1 = parseInt(temps[0]);
                     const t2 = parseInt(temps[1]);
@@ -181,18 +180,30 @@
                 }
 
                 let clothesMsg = "";
-                if (maxT >= 25) {
-                    clothesMsg = "半そでがいいね！";
-                } else if (maxT >= 20) {
-                    clothesMsg = "長そでのシャツがピッタリ！";
-                } else if (maxT >= 15) {
-                    clothesMsg = "上着を持っていこう！";
-                } else if (maxT >= 10) {
-                    clothesMsg = "セーターかコートを着てね！";
-                } else {
-                    clothesMsg = "ダウンや手ぶくろで暖かく！";
-                }
+                if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
+                else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
+                else if (maxT >= 15) { clothesMsg = "上着を持っていこう！"; } 
+                else if (maxT >= 10) { clothesMsg = "セーターかコートを着てね！"; } 
+                else { clothesMsg = "ダウンや手ぶくろで暖かく！"; }
                 document.getElementById('clothesText').innerText = clothesMsg;
+
+                // 2. Open-Meteo APIからの湿度取得処理
+                try {
+                    const meteoRes = await fetch(meteoUrl);
+                    const meteoData = await meteoRes.json();
+                    const humidity = meteoData.current.relative_humidity_2m;
+                    
+                    // 湿度に合わせて一言アドバイスも追加
+                    let humidMsg = `いま ${humidity} ％`;
+                    if (humidity < 40) {
+                        humidMsg += "（かんそう 注意！）";
+                    } else if (humidity > 70) {
+                        humidMsg += "（ジメジメ 注意！）";
+                    }
+                    document.getElementById('humidityText').innerText = humidMsg;
+                } catch (e) {
+                    document.getElementById('humidityText').innerText = "取得エラー";
+                }
 
             } catch (error) {
                 document.getElementById('weatherText').innerText = "エラーが起きたよ";
