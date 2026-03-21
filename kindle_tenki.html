@@ -12,36 +12,30 @@
             font-family: sans-serif;
             text-align: center;
             margin: 0;
-            padding: 0; /* bodyのpaddingは一旦リセット */
+            padding: 0; 
         }
 
-        /* --- ヘッダー部分の修正 --- */
+        /* --- ヘッダー部分のレイアウト（今のまま維持） --- */
         .header-container {
-            /* 最上部の空白行 */
             margin-top: 30px; 
             padding: 0 10px;
         }
         
         .header {
-            /* 縦並びにして、下揃えではなく中央揃えに */
             display: flex;
             flex-direction: column;
             align-items: center; 
             border-bottom: 3px solid #000;
             padding-bottom: 10px;
-            /* 横棒の下に空白行 */
             margin-bottom: 30px; 
         }
 
-        /* 日付（今のサイズを維持） */
         .date {
             font-size: 2.2rem;
             font-weight: bold;
-            /* 日付と時間の間の空白行 */
             margin-bottom: 20px; 
         }
         
-        /* 更新時間（今のサイズを維持） */
         .time {
             font-size: 1.5rem;
             font-weight: bold;
@@ -66,7 +60,7 @@
             margin-bottom: 30px;
         }
 
-        /* --- アドバイスボックスの修正 --- */
+        /* --- アドバイスボックス（イマイチの解消） --- */
         .advice-box {
             border: 5px solid #000;
             border-radius: 15px;
@@ -77,23 +71,30 @@
         }
         
         .advice-item {
-            /* 全体の文字サイズをメッセージと同じに */
             font-size: 2.5rem; 
             margin: 15px 0;
-            display: flex;
-            align-items: center;
+            display: flex; 
+            align-items: center; /* 縦方向は中央揃え */
+            /* 全体を少し中央寄りに */
+            padding: 0 10px; 
         }
         
-        /* 文字アイコンの部分（[傘] [服装]）の修正 */
         .text-icon {
-            /* フォントサイズをメッセージ（2.5rem）と同じに */
+            /* フォントサイズをメッセージと同じに */
             font-size: 2.5rem; 
-            margin-right: 15px;
-            /* 文字が大きくなったので幅も調整 */
-            min-width: 100px; 
+            /* アイコンとメッセージの間の空白（今のまま維持） */
+            margin-right: 15px; 
+            /* 【修正】min-widthを撤廃。幅を固定しない */
+            min-width: 0; 
+            width: auto; 
             text-align: center;
-            /* []の中は今のまま細く（font-weight:normal）を維持 */
             font-weight: normal; 
+        }
+
+        /* 【追加】メッセージ部分（はみ出し防止と改行） */
+        #umbrellaText, #clothesText {
+            word-break: break-all; /* 文字がはみ出すのを防ぐ */
+            flex: 1; /* 残りの幅をすべて使い、改行を許可する */
         }
     </style>
 </head>
@@ -125,6 +126,10 @@
     </div>
 
     <script>
+        // 日本時間（Asia/Tokyo）に固定するためのDateTimeFormatのオプション
+        const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        const formatter = new Intl.DateTimeFormat('ja-JP', options);
+
         const url = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
 
         async function fetchWeather() {
@@ -132,30 +137,38 @@
                 const response = await fetch(url);
                 const data = await response.json();
 
-                const now = new Date();
-                
-                const year = now.getFullYear();
+                // 【修正】KindleのUTC問題を回避し、日本時間を強制取得
+                const parts = formatter.formatToParts(new Date());
+
+                const year = parseInt(parts.find(p => p.type === 'year').value);
+                const month = parseInt(parts.find(p => p.type === 'month').value);
+                const day = parseInt(parts.find(p => p.type === 'day').value);
+                const h = parts.find(p => p.type === 'hour').value;
+                const m = parts.find(p => p.type === 'minute').value;
+
+                // 日付（和暦と曜日）の計算
+                const dateObj = new Date(year, month - 1, day);
                 const reiwa = year - 2018; 
                 const days = ['日', '月', '火', '水', '木', '金', '土'];
-                const dayStr = days[now.getDay()];
+                const dayStr = days[dateObj.getDay()];
                 
-                document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${now.getMonth() + 1}月${now.getDate()}日(${dayStr})`;
-                
-                const h = String(now.getHours()).padStart(2, '0');
-                const m = String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
                 document.getElementById('updateTime').innerText = `${h}:${m} 更新`;
 
+                // 天気テキストの取得と小学校漢字への調整
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ')
                                              .replace(/曇り/g, 'くもり');
                 document.getElementById('weatherText').innerText = cleanWeather;
 
+                // 傘のアドバイス
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
                     document.getElementById('umbrellaText').innerText = "忘れないで持っていこう！";
                 } else {
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
+                // 気温の取得と服装アドバイス
                 const temps = data[0].timeSeries[2].areas[0].temps;
                 let maxT = 20; 
                 
