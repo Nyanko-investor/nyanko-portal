@@ -1,18 +1,158 @@
-const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="10800">
+    <title>Nyanko Portal Kindle</title>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0; 
+        }
+
+        .header-container {
+            margin-top: 30px; 
+            padding: 0 10px;
+        }
+        
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 30px; 
+        }
+
+        .date {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 20px; 
+        }
+        
+        .time {
+            font-size: 1.5rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .main-content {
+            padding: 0 10px;
+        }
+        
+        .weather {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 20px 0;
+            line-height: 1.2;
+        }
+        
+        .temp-container {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            line-height: 1.2;
+        }
+
+        .temp {
+            font-size: 4rem; 
+            font-weight: bold;
+        }
+
+        .humidity {
+            font-size: 2.5rem; 
+            font-weight: normal;
+            margin-top: 10px;
+        }
+
+        .advice-box {
+            border: 5px solid #000;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 20px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .advice-item {
+            font-size: 2.0rem; 
+            margin: 15px 0;
+            display: flex; 
+            align-items: center; 
+            padding: 0 10px; 
+        }
+        
+        .text-icon {
+            font-size: 2.0rem; 
+            margin-right: 15px; 
+            min-width: 0; 
+            width: auto; 
+            text-align: center;
+            font-weight: normal; 
+            white-space: nowrap; 
+        }
+
+        #umbrellaText, #clothesText {
+            word-break: break-all; 
+            flex: 1; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="header">
+            <div class="date" id="dateText">----年(令和-年) -月-日(-)</div>
+            <div class="time" id="updateTime">--:-- 更新</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="weather" id="weatherText">読込中...</div>
+        
+        <div class="temp-container">
+            <div class="temp">
+                <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
+            </div>
+            <div class="humidity" id="humidityText">
+                (湿度 --%)
+            </div>
+        </div>
+
+        <div class="advice-box">
+            <div class="advice-item">
+                <span class="text-icon">[雨傘]</span>
+                <span id="umbrellaText">確認中...</span>
+            </div>
+            <div class="advice-item">
+                <span class="text-icon">[服装]</span>
+                <span id="clothesText">確認中...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
         const formatter = new Intl.DateTimeFormat('ja-JP', options);
 
-        const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json";
-        const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo";
+        const jmaUrl = "[https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json](https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json)";
+        const meteoUrl = "[https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo](https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo)";
 
         async function fetchWeather() {
             try {
-                // ★追加：キャッシュバスター（毎回違うランダムな数字を生成）
+                // 【超重要】Kindleブラウザにサボらせないための「キャッシュバスター（毎回違うランダムな数字）」
                 const uniqueTime = new Date().getTime();
                 const jmaNoCache = jmaUrl + "?_=" + uniqueTime;
                 const meteoNoCache = meteoUrl + "&_=" + uniqueTime;
 
-                // URLの後ろにランダム数字をつけて、強制的に最新データを取得
-                const response = await fetch(jmaNoCache, { cache: "no-store" });
+                // 1. 気象庁からお天気テキストを取得（ランダム数字付きURLを使用）
+                const response = await fetch(jmaNoCache);
                 const data = await response.json();
 
                 const parts = formatter.formatToParts(new Date());
@@ -45,9 +185,9 @@ const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month:
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // Open-Meteo側もキャッシュを回避
+                // 2. Open-Meteoから気温と湿度を取得（ランダム数字付きURLを使用）
                 try {
-                    const meteoRes = await fetch(meteoNoCache, { cache: "no-store" });
+                    const meteoRes = await fetch(meteoNoCache);
                     const meteoData = await meteoRes.json();
                     
                     const humidity = meteoData.current.relative_humidity_2m;
@@ -81,7 +221,14 @@ const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month:
         // 初回読み込み
         fetchWeather();
 
-        // タイムワープ検知（5秒ごとに時間を監視し、60秒以上スリープしていたら更新）
+        // 【復帰検知1】画面が表示された瞬間（最新ブラウザ用）
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                fetchWeather(); 
+            }
+        });
+
+        // 【復帰検知2】タイムワープ検知（古いKindle用：60秒以上スリープしていたら更新）
         let lastTime = Date.now();
         setInterval(() => {
             const currentTime = Date.now();
@@ -94,4 +241,8 @@ const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month:
         // 念のためのエコ更新（3時間）
         setTimeout(() => {
             window.location.reload();
-        }, 10800000);
+        }, 10800000); 
+
+    </script>
+</body>
+</html>
