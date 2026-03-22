@@ -18,30 +18,38 @@
             flex-direction: column;
         }
 
-        .header-container { margin-top: 30px; padding: 0 10px; }
-        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 30px; }
-        .date { font-size: 2.2rem; font-weight: bold; margin-bottom: 20px; }
-        .time { font-size: 1.5rem; font-weight: bold; white-space: nowrap; }
+        /* 縦幅を節約するために全体的にマージンとフォントサイズを微調整 */
+        .header-container { margin-top: 20px; padding: 0 10px; }
+        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 3px solid #000; padding-bottom: 5px; margin-bottom: 15px; }
+        .date { font-size: 2.0rem; font-weight: bold; margin-bottom: 10px; }
+        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; }
         .main-content { padding: 0 10px; flex-grow: 1; }
         
-        /* つなぎ文字が小さくなった時に行間が詰まりすぎないよう1.4に調整 */
-        .weather { font-size: 4rem; font-weight: bold; margin: 20px 0; line-height: 1.4; }
+        .weather { font-size: 3.5rem; font-weight: bold; margin: 15px 0; line-height: 1.4; }
 
-        /* つなぎ言葉用のスタイル設定 */
         .connector {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: normal;
             margin: 0 4px;
             vertical-align: middle;
         }
         
-        .temp-container { margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
-        .temp { font-size: 4rem; font-weight: bold; }
-        .humidity { font-size: 2.2rem; font-weight: normal; margin-top: 10px; }
-        .advice-box { border: 5px solid #000; border-radius: 15px; padding: 20px; margin: 10px 20px; text-align: left; font-weight: bold; }
-        .advice-item { font-size: 2.0rem; margin: 15px 0; display: flex; align-items: center; padding: 0 10px; }
-        .text-icon { font-size: 2.0rem; margin-right: 15px; min-width: 0; width: auto; text-align: center; font-weight: normal; white-space: nowrap; }
+        .temp-container { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+        .temp { font-size: 3.5rem; font-weight: bold; }
+        .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 8px; }
+        
+        .advice-box { border: 4px solid #000; border-radius: 15px; padding: 15px; margin: 5px 20px; text-align: left; font-weight: bold; }
+        .advice-item { font-size: 1.8rem; margin: 10px 0; display: flex; align-items: center; padding: 0 5px; }
+        .text-icon { font-size: 1.8rem; margin-right: 15px; min-width: 0; width: auto; text-align: center; font-weight: normal; white-space: nowrap; }
         #umbrellaText, #clothesText { word-break: break-all; flex: 1; }
+
+        /* アドバイスボックスの下に配置する運行情報用スタイル */
+        .train-info {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 0 20px;
+        }
     </style>
 </head>
 <body>
@@ -75,6 +83,8 @@
                 <span id="clothesText">確認中...</span>
             </div>
         </div>
+
+        <div class="train-info" id="trainText">🚃 運行情報確認中...</div>
     </div>
 
     <script>
@@ -84,11 +94,12 @@
                 updateTimeEl.innerText = "更新中...";
 
                 const uniqueTime = new Date().getTime();
-                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
-                // Open-MeteoのURLに wind_speed_10m を追加
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
+                // 東京の天気エリアコード(130000)
+                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json?_=" + uniqueTime;
+                // 東京の緯度・経度
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
-                // 気象庁データ取得
+                // 1. 気象庁データ取得
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -125,13 +136,13 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // Open-Meteoから気温・湿度・風速を取得
+                // 2. Open-Meteoデータ取得（気温・湿度・風速）
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
                     
                     const humidity = meteoData.current.relative_humidity_2m;
-                    const wind = meteoData.current.wind_speed_10m; // 風速を取得
+                    const wind = meteoData.current.wind_speed_10m; 
                     document.getElementById('humidityText').innerText = `(湿度 ${humidity}% / 風速 ${wind}m/s)`;
 
                     const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
@@ -152,6 +163,32 @@
                     document.getElementById('humidityText').innerText = "(湿度 --% / 風速 --m/s)";
                     document.getElementById('minTemp').innerText = "--";
                     document.getElementById('maxTemp').innerText = "--";
+                }
+
+                // 3. 東海道線の遅延チェック（Yahoo路線RSSの変換）
+                try {
+                    const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
+                    const trainRes = await fetch(trainUrl);
+                    const trainData = await trainRes.json();
+                    
+                    let isDelayed = false;
+                    if (trainData.items) {
+                        for (let item of trainData.items) {
+                            if (item.title.includes("東海道")) {
+                                isDelayed = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    const trainEl = document.getElementById('trainText');
+                    if (isDelayed) {
+                        trainEl.innerText = "⚠️ 東海道線に遅れが出ています！";
+                    } else {
+                        trainEl.innerText = "🚃 東海道線は平常運転です";
+                    }
+                } catch (e) {
+                    document.getElementById('trainText').innerText = "🚃 運行情報が取得できません";
                 }
 
                 updateTimeEl.innerText = `${h}:${m} 更新`;
