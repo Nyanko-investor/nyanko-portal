@@ -208,11 +208,11 @@
                     
                     const countdownEl = document.getElementById('countdownText');
                     if (diffDays > 0) {
-                        countdownEl.innerText = `中学受験(2/1)まで あと ${diffDays} 日！`;
+                        countdownEl.innerText = `[目標] 中学受験(2/1)まで あと ${diffDays} 日！`;
                     } else if (diffDays === 0) {
-                        countdownEl.innerText = `いよいよ本番！全力を出し切れ！`;
+                        countdownEl.innerText = `[目標] いよいよ本番！全力を出し切れ！`;
                     } else {
-                        countdownEl.innerText = `受験お疲れ様でした！`;
+                        countdownEl.innerText = `[目標] 受験お疲れ様でした！`;
                     }
                 } catch (e) {
                     document.getElementById('countdownText').innerText = "";
