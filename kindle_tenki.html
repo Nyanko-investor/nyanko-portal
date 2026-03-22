@@ -18,44 +18,49 @@
             flex-direction: column;
         }
 
-        /* スクロールを解消するため、全体の余白とサイズを限界まで微調整 */
+        /* 縦の隙間をさらに限界まで詰めてスクロールを防止 */
         .header-container { margin-top: 15px; padding: 0 10px; }
-        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; }
-        .date { font-size: 2.0rem; font-weight: bold; margin-bottom: 5px; } /* わずかに縮小 */
+        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px; }
+        .date { font-size: 2.0rem; font-weight: bold; margin-bottom: 5px; } 
         .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; }
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .weather { font-size: 3.5rem; font-weight: bold; margin: 10px 0; line-height: 1.3; } /* わずかに縮小 */
+        .weather { font-size: 3.5rem; font-weight: bold; margin: 8px 0; line-height: 1.3; } 
         .connector { font-size: 1.8rem; font-weight: normal; margin: 0 4px; vertical-align: middle; }
         
-        .temp-container { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
-        /* 気温は3.0remをキープ */
+        .temp-container { margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .temp { font-size: 3.0rem; font-weight: bold; }
         .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 5px; }
         
-        /* アドバイスボックスの中身が1行に収まるようにフォントを微調整 */
-        .advice-box { border: 3px solid #000; border-radius: 10px; padding: 10px; margin: 0 15px; text-align: left; font-weight: bold; }
+        /* アドバイスボックス：文字を小さくし、絶対に1行に収める */
+        .advice-box { border: 3px solid #000; border-radius: 10px; padding: 8px; margin: 0 15px; text-align: left; font-weight: bold; }
         .advice-item {
-            font-size: 1.8rem; /* ★ここを2.0remから1.8remに「ちょびっと」縮小 */
-            margin: 8px 0; /* 隙間を少し詰める */
+            font-size: 1.5rem; /* ★1.8remから1.5remへさらに縮小 */
+            margin: 5px 0; /* ★上下の隙間も削って縦幅を節約 */
             display: flex;
             align-items: center;
             padding: 0 5px;
-            white-space: nowrap; /* 絶対に折り返さないように強制 */
+            white-space: nowrap; /* 1行に強制 */
+            overflow: hidden; /* 万が一はみ出ても枠を広げない安全装置 */
         }
-        .text-icon { font-size: 1.8rem; margin-right: 10px; text-align: center; font-weight: normal; white-space: nowrap; }
-        #umbrellaText, #clothesText { flex: 1; }
+        .text-icon { font-size: 1.5rem; margin-right: 8px; text-align: center; font-weight: normal; white-space: nowrap; }
+        #umbrellaText, #clothesText { 
+            flex: 1; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; /* 限界を超えたら「...」で省略してレイアウト崩れを防ぐ */
+        }
 
-        /* 追加情報エリアも文字を少し大きくしつつ、隙間を調整 */
+        /* 追加情報エリアの隙間も微調整 */
         .extra-info-box {
-            margin: 15px 15px 10px 15px; /* 隙間を詰める */
+            margin: 10px 15px 10px 15px; 
             text-align: left;
             font-weight: bold;
-            font-size: 1.8rem; /* アドバイス欄と合わせて少し縮小 */
+            font-size: 1.8rem; 
             display: flex;
             flex-direction: column;
-            gap: 10px; /* 行間を少し詰める */
+            gap: 8px; 
         }
         .extra-item {
             border-bottom: 1px dashed #000;
@@ -110,12 +115,9 @@
                 updateTimeEl.innerText = "更新中...";
 
                 const uniqueTime = new Date().getTime();
-                // 横浜の天気エリアコード(140000)
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
-                // 横浜の緯度・経度
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
-                // 1. 気象庁データ取得と日付・天気の処理
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -136,7 +138,6 @@
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
                 
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
-                // 漢字の「後」を「のち」に変換
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
                 const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
@@ -153,7 +154,6 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 2. Open-Meteoデータ取得（気温・湿度・風速）
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -182,7 +182,6 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
-                // 3. 東海道線の遅延チェック（シンプルなテキスト版）
                 try {
                     const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
                     const trainRes = await fetch(trainUrl);
@@ -199,7 +198,6 @@
                     }
                     
                     const trainEl = document.getElementById('trainText');
-                    // 文言をスッキリさせました
                     if (isDelayed) {
                         trainEl.innerText = "・東海道線に遅れが出ています";
                     } else {
@@ -209,7 +207,6 @@
                     document.getElementById('trainText').innerText = "・運行情報が取得できません";
                 }
 
-                // 4. 中学受験カウントダウン（例として2027年2月1日を設定）
                 try {
                     const targetDate = new Date('2027-02-01T00:00:00+09:00');
                     const todayForCount = new Date();
@@ -218,7 +215,6 @@
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     
                     const countdownEl = document.getElementById('countdownText');
-                    // 文言をご指定のシンプルな形に変更しました
                     if (diffDays > 0) {
                         countdownEl.innerText = `・受験まで あと${diffDays}日！`;
                     } else if (diffDays === 0) {
@@ -233,7 +229,7 @@
                 updateTimeEl.innerText = `${h}:${m} 更新`;
 
             } catch (error) {
-                document.getElementById('weatherText').innerText = "エラーが起きました";
+                document.getElementById('weatherText').innerText = "エラーが起きたよ";
                 document.getElementById('updateTime').innerText = "更新失敗";
             }
         }
