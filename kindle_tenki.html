@@ -27,17 +27,17 @@
         /* つなぎ文字が小さくなった時に行間が詰まりすぎないよう1.4に調整 */
         .weather { font-size: 4rem; font-weight: bold; margin: 20px 0; line-height: 1.4; }
 
-        /* つなぎ言葉（のち、昼過ぎなど）用のスタイル設定 */
+        /* つなぎ言葉用のスタイル設定 */
         .connector {
-            font-size: 2rem; /* サイズを小さく */
-            font-weight: normal; /* 太字を解除 */
-            margin: 0 4px; /* 横に少し余白を追加 */
-            vertical-align: middle; /* 上下中央に配置 */
+            font-size: 2rem;
+            font-weight: normal;
+            margin: 0 4px;
+            vertical-align: middle;
         }
         
         .temp-container { margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .temp { font-size: 4rem; font-weight: bold; }
-        .humidity { font-size: 2.5rem; font-weight: normal; margin-top: 10px; }
+        .humidity { font-size: 2.2rem; font-weight: normal; margin-top: 10px; }
         .advice-box { border: 5px solid #000; border-radius: 15px; padding: 20px; margin: 10px 20px; text-align: left; font-weight: bold; }
         .advice-item { font-size: 2.0rem; margin: 15px 0; display: flex; align-items: center; padding: 0 10px; }
         .text-icon { font-size: 2.0rem; margin-right: 15px; min-width: 0; width: auto; text-align: center; font-weight: normal; white-space: nowrap; }
@@ -61,7 +61,7 @@
                 <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
             </div>
             <div class="humidity" id="humidityText">
-                (湿度 --%)
+                (湿度 --% / 風速 --m/s)
             </div>
         </div>
 
@@ -80,16 +80,15 @@
     <script>
         async function fetchWeather() {
             try {
-                // 更新開始の合図
                 const updateTimeEl = document.getElementById('updateTime');
                 updateTimeEl.innerText = "更新中...";
 
-                // キャッシュバスター：URLに時間を混ぜてKindleのサボりを防止
                 const uniqueTime = new Date().getTime();
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
+                // Open-MeteoのURLに wind_speed_10m を追加
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
-                // 1. 気象庁データ取得
+                // 気象庁データ取得
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -112,16 +111,10 @@
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり');
                 
-                // つなぎ言葉だけを小さくする処理
-                // 気象庁の予報用語に含まれるコネクター文字を検知
                 const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
-                // 対象の文字を<span class="connector">で囲む
                 const htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
-                
-                // もとの「innerText」をタグが使える「innerHTML」に変更して画面に表示
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
-                // 傘アドバイスのロジック（もとのまま）
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
                     if (cleanWeather.includes('一時') || cleanWeather.includes('のち') || cleanWeather.includes('ところにより')) {
                         document.getElementById('umbrellaText').innerText = "折りたたみかさがあると安心！";
@@ -132,13 +125,14 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 2. Open-Meteoから気温と湿度を取得（もとのまま）
+                // Open-Meteoから気温・湿度・風速を取得
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
                     
                     const humidity = meteoData.current.relative_humidity_2m;
-                    document.getElementById('humidityText').innerText = `(湿度 ${humidity}%)`;
+                    const wind = meteoData.current.wind_speed_10m; // 風速を取得
+                    document.getElementById('humidityText').innerText = `(湿度 ${humidity}% / 風速 ${wind}m/s)`;
 
                     const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
                     const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
@@ -146,7 +140,6 @@
                     document.getElementById('minTemp').innerText = minT;
                     document.getElementById('maxTemp').innerText = maxT;
 
-                    // 服装アドバイスのロジック（もとのまま）
                     let clothesMsg = "";
                     if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
                     else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
@@ -156,12 +149,11 @@
                     document.getElementById('clothesText').innerText = clothesMsg;
 
                 } catch (e) {
-                    document.getElementById('humidityText').innerText = "(湿度 --%)";
+                    document.getElementById('humidityText').innerText = "(湿度 --% / 風速 --m/s)";
                     document.getElementById('minTemp').innerText = "--";
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
-                // 更新完了
                 updateTimeEl.innerText = `${h}:${m} 更新`;
 
             } catch (error) {
@@ -170,13 +162,9 @@
             }
         }
 
-        // 初回読み込み
         fetchWeather();
-
-        // 【実運用：2時間更新】7,200,000ミリ秒ごとに自動実行
         setInterval(fetchWeather, 7200000);
 
-        // 念のための全体リロード（6時間おき）
         setTimeout(() => {
             window.location.reload();
         }, 21600000); 
