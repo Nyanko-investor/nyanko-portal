@@ -18,42 +18,48 @@
             flex-direction: column;
         }
 
-        /* 余白を活かして全体的にフォントサイズを大きく調整 */
-        .header-container { margin-top: 25px; padding: 0 10px; }
-        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
-        .date { font-size: 2.2rem; font-weight: bold; margin-bottom: 8px; }
-        .time { font-size: 1.6rem; font-weight: bold; white-space: nowrap; }
+        /* スクロールを解消するため、全体の余白とサイズを限界まで微調整 */
+        .header-container { margin-top: 15px; padding: 0 10px; }
+        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; }
+        .date { font-size: 2.0rem; font-weight: bold; margin-bottom: 5px; } /* わずかに縮小 */
+        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; }
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* 天気はさらに大きく、迫力を出す */
-        .weather { font-size: 3.8rem; font-weight: bold; margin: 15px 0; line-height: 1.4; }
-        .connector { font-size: 2.0rem; font-weight: normal; margin: 0 4px; vertical-align: middle; }
+        .weather { font-size: 3.5rem; font-weight: bold; margin: 10px 0; line-height: 1.3; } /* わずかに縮小 */
+        .connector { font-size: 1.8rem; font-weight: normal; margin: 0 4px; vertical-align: middle; }
         
-        .temp-container { margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
-        /* 気温はご要望通り変更なし(3.0rem) */
+        .temp-container { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+        /* 気温は3.0remをキープ */
         .temp { font-size: 3.0rem; font-weight: bold; }
-        /* 湿度は少しだけ大きく */
-        .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 8px; }
+        .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 5px; }
         
-        .advice-box { border: 3px solid #000; border-radius: 12px; padding: 15px; margin: 0 20px; text-align: left; font-weight: bold; }
-        .advice-item { font-size: 2.0rem; margin: 12px 0; display: flex; align-items: center; padding: 0 5px; }
-        .text-icon { font-size: 2.0rem; margin-right: 12px; text-align: center; font-weight: normal; white-space: nowrap; }
-        #umbrellaText, #clothesText { word-break: break-all; flex: 1; }
+        /* アドバイスボックスの中身が1行に収まるようにフォントを微調整 */
+        .advice-box { border: 3px solid #000; border-radius: 10px; padding: 10px; margin: 0 15px; text-align: left; font-weight: bold; }
+        .advice-item {
+            font-size: 1.8rem; /* ★ここを2.0remから1.8remに「ちょびっと」縮小 */
+            margin: 8px 0; /* 隙間を少し詰める */
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            white-space: nowrap; /* 絶対に折り返さないように強制 */
+        }
+        .text-icon { font-size: 1.8rem; margin-right: 10px; text-align: center; font-weight: normal; white-space: nowrap; }
+        #umbrellaText, #clothesText { flex: 1; }
 
-        /* 追加情報エリアの文字も大きくし、行間(gap)を広げる */
+        /* 追加情報エリアも文字を少し大きくしつつ、隙間を調整 */
         .extra-info-box {
-            margin: 25px 20px 20px 20px;
+            margin: 15px 15px 10px 15px; /* 隙間を詰める */
             text-align: left;
             font-weight: bold;
-            font-size: 2.0rem;
+            font-size: 1.8rem; /* アドバイス欄と合わせて少し縮小 */
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px; /* 行間を少し詰める */
         }
         .extra-item {
             border-bottom: 1px dashed #000;
-            padding-bottom: 8px;
+            padding-bottom: 5px;
         }
     </style>
 </head>
@@ -92,8 +98,8 @@
         </div>
 
         <div class="extra-info-box">
-            <div class="extra-item" id="trainText">・ 運行情報確認中...</div>
-            <div class="extra-item" id="countdownText">・ カウントダウン計算中...</div>
+            <div class="extra-item" id="trainText">・運行情報確認中...</div>
+            <div class="extra-item" id="countdownText">・カウントダウン計算中...</div>
         </div>
     </div>
 
@@ -104,9 +110,12 @@
                 updateTimeEl.innerText = "更新中...";
 
                 const uniqueTime = new Date().getTime();
+                // 横浜の天気エリアコード(140000)
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
+                // 横浜の緯度・経度
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
+                // 1. 気象庁データ取得と日付・天気の処理
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -127,7 +136,7 @@
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
                 
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
-                // ▼ここが修正ポイント！ 漢字の「後」を「のち」に変換してから処理します
+                // 漢字の「後」を「のち」に変換
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
                 const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
@@ -144,6 +153,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
+                // 2. Open-Meteoデータ取得（気温・湿度・風速）
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -172,6 +182,7 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
+                // 3. 東海道線の遅延チェック（シンプルなテキスト版）
                 try {
                     const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
                     const trainRes = await fetch(trainUrl);
@@ -188,7 +199,7 @@
                     }
                     
                     const trainEl = document.getElementById('trainText');
-                    // ▼ここをシンプルな「・」表示に変更しました
+                    // 文言をスッキリさせました
                     if (isDelayed) {
                         trainEl.innerText = "・東海道線に遅れが出ています";
                     } else {
@@ -198,6 +209,7 @@
                     document.getElementById('trainText').innerText = "・運行情報が取得できません";
                 }
 
+                // 4. 中学受験カウントダウン（例として2027年2月1日を設定）
                 try {
                     const targetDate = new Date('2027-02-01T00:00:00+09:00');
                     const todayForCount = new Date();
@@ -206,11 +218,11 @@
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     
                     const countdownEl = document.getElementById('countdownText');
-                    // ▼ここも「・」始まりのシンプルなテキストに変更しました
+                    // 文言をご指定のシンプルな形に変更しました
                     if (diffDays > 0) {
                         countdownEl.innerText = `・受験まで あと${diffDays}日！`;
                     } else if (diffDays === 0) {
-                        countdownEl.innerText = `・いよいよ受験本番！全力を出し切れ！`;
+                        countdownEl.innerText = `・いよいよ本番！全力を出し切れ！`;
                     } else {
                         countdownEl.innerText = `・受験お疲れ様でした！`;
                     }
@@ -221,7 +233,7 @@
                 updateTimeEl.innerText = `${h}:${m} 更新`;
 
             } catch (error) {
-                document.getElementById('weatherText').innerText = "エラーが起きたよ";
+                document.getElementById('weatherText').innerText = "エラーが起きました";
                 document.getElementById('updateTime').innerText = "更新失敗";
             }
         }
