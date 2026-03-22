@@ -18,21 +18,22 @@
             flex-direction: column;
         }
 
-        .header-container { margin-top: 15px; padding: 0 10px; }
-        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px; }
-        .date { font-size: 2.0rem; font-weight: bold; margin-bottom: 5px; } 
+        /* 4行入るように上部の隙間をさらに数ミリずつ節約 */
+        .header-container { margin-top: 10px; padding: 0 10px; }
+        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
+        .date { font-size: 2.0rem; font-weight: bold; margin-bottom: 3px; } 
         .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; }
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .weather { font-size: 3.5rem; font-weight: bold; margin: 8px 0; line-height: 1.3; } 
+        .weather { font-size: 3.5rem; font-weight: bold; margin: 5px 0; line-height: 1.2; } 
         .connector { font-size: 1.8rem; font-weight: normal; margin: 0 4px; vertical-align: middle; }
         
-        .temp-container { margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+        .temp-container { margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .temp { font-size: 3.0rem; font-weight: bold; }
         .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 5px; }
         
-        .advice-box { border: 3px solid #000; border-radius: 10px; padding: 8px; margin: 0 15px; text-align: left; font-weight: bold; }
+        .advice-box { border: 3px solid #000; border-radius: 10px; padding: 6px; margin: 0 15px; text-align: left; font-weight: bold; }
         .advice-item {
             font-size: 1.5rem; 
             margin: 5px 0; 
@@ -50,14 +51,21 @@
             text-overflow: ellipsis; 
         }
 
+        /* Kindleでも確実に効く方法で余白(margin-bottom)を設定 */
         .extra-info-box {
             margin: 10px 15px 10px 15px; 
             text-align: left;
             font-weight: bold;
-            font-size: 1.8rem; 
+            font-size: 1.7rem; /* 4行入るようにほんの少しだけ縮小 */
             display: flex;
             flex-direction: column;
-            gap: 24px; /* ★ここを12pxから24pxに倍増させ、息苦しさを無くしました */
+        }
+        /* 各行の下に確実な余白を作る（最後の行は除く） */
+        .extra-info-box div {
+            margin-bottom: 15px; 
+        }
+        .extra-info-box div:last-child {
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -98,7 +106,8 @@
         <div class="extra-info-box">
             <div id="trainText">・運行情報確認中...</div>
             <div id="countdownText">・カウントダウン計算中...</div>
-            <div id="financeText">・金融情報取得中...</div>
+            <div id="usdText">・USD/JPY: 取得中...</div>
+            <div id="nasdaqText">・NASDAQ: 取得中...</div>
         </div>
     </div>
 
@@ -222,6 +231,7 @@
                     document.getElementById('countdownText').innerText = "";
                 }
 
+                // ▼ 取得時間を添えた為替処理 ▼
                 try {
                     const fxUrl = "https://open.er-api.com/v6/latest/USD";
                     const fxRes = await fetch(fxUrl);
@@ -229,9 +239,17 @@
                     
                     const usdjpy = Math.round(fxData.rates.JPY * 10) / 10;
                     
-                    document.getElementById('financeText').innerText = `・USD/JPY: ${usdjpy}円 | NASDAQ: - (要API)`;
+                    // APIが返す「最終更新時間（UNIX時間）」を日本の時間に変換
+                    const fxDate = new Date(fxData.time_last_update_unix * 1000);
+                    const fxHour = fxDate.getHours().toString().padStart(2, '0');
+                    const fxMin = fxDate.getMinutes().toString().padStart(2, '0');
+                    
+                    document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxHour}:${fxMin} 時点)`;
+                    // NASDAQは別行へ
+                    document.getElementById('nasdaqText').innerText = `・NASDAQ: --- (要API)`;
                 } catch (e) {
-                    document.getElementById('financeText').innerText = "・金融情報が取得できません";
+                    document.getElementById('usdText').innerText = "・為替情報が取得できません";
+                    document.getElementById('nasdaqText').innerText = "";
                 }
 
                 updateTimeEl.innerText = `${h}:${m} 更新`;
