@@ -18,7 +18,6 @@
             flex-direction: column;
         }
 
-        /* 4行入るように上部の隙間をさらに数ミリずつ節約 */
         .header-container { margin-top: 10px; padding: 0 10px; }
         .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
         .date { font-size: 2.0rem; font-weight: bold; margin-bottom: 3px; } 
@@ -35,15 +34,15 @@
         
         .advice-box { border: 3px solid #000; border-radius: 10px; padding: 6px; margin: 0 15px; text-align: left; font-weight: bold; }
         .advice-item {
-            font-size: 1.5rem; 
-            margin: 5px 0; 
+            font-size: 1.7rem; /* ★1.5remから1.7remへ程よく大きく戻しました */
+            margin: 4px 0; 
             display: flex;
             align-items: center;
             padding: 0 5px;
             white-space: nowrap; 
             overflow: hidden; 
         }
-        .text-icon { font-size: 1.5rem; margin-right: 8px; text-align: center; font-weight: normal; white-space: nowrap; }
+        .text-icon { font-size: 1.7rem; margin-right: 8px; text-align: center; font-weight: normal; white-space: nowrap; }
         #umbrellaText, #clothesText { 
             flex: 1; 
             white-space: nowrap; 
@@ -51,18 +50,16 @@
             text-overflow: ellipsis; 
         }
 
-        /* Kindleでも確実に効く方法で余白(margin-bottom)を設定 */
         .extra-info-box {
             margin: 10px 15px 10px 15px; 
             text-align: left;
             font-weight: bold;
-            font-size: 1.7rem; /* 4行入るようにほんの少しだけ縮小 */
+            font-size: 1.7rem; 
             display: flex;
             flex-direction: column;
         }
-        /* 各行の下に確実な余白を作る（最後の行は除く） */
         .extra-info-box div {
-            margin-bottom: 15px; 
+            margin-bottom: 12px; /* ★アドバイス欄を大きくした分、こちらの隙間を少しだけ詰めてバランスを取りました */
         }
         .extra-info-box div:last-child {
             margin-bottom: 0;
@@ -231,7 +228,6 @@
                     document.getElementById('countdownText').innerText = "";
                 }
 
-                // ▼ 取得時間を添えた為替処理 ▼
                 try {
                     const fxUrl = "https://open.er-api.com/v6/latest/USD";
                     const fxRes = await fetch(fxUrl);
@@ -239,13 +235,14 @@
                     
                     const usdjpy = Math.round(fxData.rates.JPY * 10) / 10;
                     
-                    // APIが返す「最終更新時間（UNIX時間）」を日本の時間に変換
+                    // ▼ 取得時間を「〇月〇日 〇:〇時点」にアップデート ▼
                     const fxDate = new Date(fxData.time_last_update_unix * 1000);
+                    const fxMonth = fxDate.getMonth() + 1;
+                    const fxDay = fxDate.getDate();
                     const fxHour = fxDate.getHours().toString().padStart(2, '0');
                     const fxMin = fxDate.getMinutes().toString().padStart(2, '0');
                     
-                    document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxHour}:${fxMin} 時点)`;
-                    // NASDAQは別行へ
+                    document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxMonth}月${fxDay}日 ${fxHour}:${fxMin} 時点)`;
                     document.getElementById('nasdaqText').innerText = `・NASDAQ: --- (要API)`;
                 } catch (e) {
                     document.getElementById('usdText').innerText = "・為替情報が取得できません";
