@@ -50,7 +50,6 @@
             text-overflow: ellipsis; 
         }
 
-        /* 罫線を削除し、シンプルなテキストの並びに変更 */
         .extra-info-box {
             margin: 10px 15px 10px 15px; 
             text-align: left;
@@ -58,7 +57,7 @@
             font-size: 1.8rem; 
             display: flex;
             flex-direction: column;
-            gap: 12px; /* 罫線を消した分、行間を少しだけ広げて見やすくしました */
+            gap: 12px;
         }
     </style>
 </head>
@@ -135,7 +134,11 @@
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
                 const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
-                const htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
+                let htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
+                
+                // 特定の繋ぎ言葉の前で改行を入れてバランスを整える
+                htmlWeather = htmlWeather.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
+                
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
