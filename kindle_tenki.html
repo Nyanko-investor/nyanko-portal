@@ -98,6 +98,7 @@
         <div class="extra-info-box">
             <div id="trainText">・運行情報確認中...</div>
             <div id="countdownText">・カウントダウン計算中...</div>
+            <div id="financeText">・金融情報取得中...</div>
         </div>
     </div>
 
@@ -136,9 +137,7 @@
                 const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
                 let htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
                 
-                // 特定の繋ぎ言葉の前で改行を入れてバランスを整える
                 htmlWeather = htmlWeather.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
-                
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
                 if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
@@ -221,6 +220,21 @@
                     }
                 } catch (e) {
                     document.getElementById('countdownText').innerText = "";
+                }
+
+                // ▼ ここが追加した為替情報の処理です ▼
+                try {
+                    const fxUrl = "https://open.er-api.com/v6/latest/USD";
+                    const fxRes = await fetch(fxUrl);
+                    const fxData = await fxRes.json();
+                    
+                    // ドル円を小数点第一位で丸める (例: 151.2)
+                    const usdjpy = Math.round(fxData.rates.JPY * 10) / 10;
+                    
+                    // NASDAQはAPIキーが必要なためプレースホルダー
+                    document.getElementById('financeText').innerText = `・USD/JPY: ${usdjpy}円 | NASDAQ: - (要API)`;
+                } catch (e) {
+                    document.getElementById('financeText').innerText = "・金融情報が取得できません";
                 }
 
                 updateTimeEl.innerText = `${h}:${m} 更新`;
