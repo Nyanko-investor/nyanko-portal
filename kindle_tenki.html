@@ -57,7 +57,7 @@
             font-size: 1.8rem; 
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 24px; /* ★ここを12pxから24pxに倍増させ、息苦しさを無くしました */
         }
     </style>
 </head>
@@ -222,16 +222,13 @@
                     document.getElementById('countdownText').innerText = "";
                 }
 
-                // ▼ ここが追加した為替情報の処理です ▼
                 try {
                     const fxUrl = "https://open.er-api.com/v6/latest/USD";
                     const fxRes = await fetch(fxUrl);
                     const fxData = await fxRes.json();
                     
-                    // ドル円を小数点第一位で丸める (例: 151.2)
                     const usdjpy = Math.round(fxData.rates.JPY * 10) / 10;
                     
-                    // NASDAQはAPIキーが必要なためプレースホルダー
                     document.getElementById('financeText').innerText = `・USD/JPY: ${usdjpy}円 | NASDAQ: - (要API)`;
                 } catch (e) {
                     document.getElementById('financeText').innerText = "・金融情報が取得できません";
