@@ -84,7 +84,7 @@
             </div>
         </div>
 
-        <div class="train-info" id="trainText">🚃 運行情報確認中...</div>
+        <div class="train-info" id="trainText">・ 運行情報確認中...</div>
     </div>
 
     <script>
@@ -165,7 +165,7 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
-                // 3. 東海道線の遅延チェック（Yahoo路線RSSの変換）
+                // 3. 東海道線の遅延チェック（絵文字排除版）
                 try {
                     const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
                     const trainRes = await fetch(trainUrl);
@@ -183,12 +183,12 @@
                     
                     const trainEl = document.getElementById('trainText');
                     if (isDelayed) {
-                        trainEl.innerText = "⚠️ 東海道線に遅れが出ています！";
+                        trainEl.innerText = "△ 東海道線に遅れが出ています！";
                     } else {
-                        trainEl.innerText = "🚃 東海道線は平常運転です";
+                        trainEl.innerText = "□ 東海道線は平常運転です";
                     }
                 } catch (e) {
-                    document.getElementById('trainText').innerText = "🚃 運行情報が取得できません";
+                    document.getElementById('trainText').innerText = "× 運行情報が取得できません";
                 }
 
                 updateTimeEl.innerText = `${h}:${m} 更新`;
