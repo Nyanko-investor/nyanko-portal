@@ -18,37 +18,39 @@
             flex-direction: column;
         }
 
-        /* 縦幅を節約するために全体的にマージンとフォントサイズを微調整 */
-        .header-container { margin-top: 20px; padding: 0 10px; }
-        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 3px solid #000; padding-bottom: 5px; margin-bottom: 15px; }
-        .date { font-size: 2.0rem; font-weight: bold; margin-bottom: 10px; }
-        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; }
-        .main-content { padding: 0 10px; flex-grow: 1; }
+        /* 縦幅を節約し、全てを1画面に収めるための最適化スタイル */
+        .header-container { margin-top: 15px; padding: 0 10px; }
+        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; }
+        .date { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; }
+        .time { font-size: 1.3rem; font-weight: bold; white-space: nowrap; }
         
-        .weather { font-size: 3.5rem; font-weight: bold; margin: 15px 0; line-height: 1.4; }
-
-        .connector {
-            font-size: 1.8rem;
-            font-weight: normal;
-            margin: 0 4px;
-            vertical-align: middle;
-        }
+        .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .temp-container { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
-        .temp { font-size: 3.5rem; font-weight: bold; }
-        .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 8px; }
+        .weather { font-size: 3.0rem; font-weight: bold; margin: 10px 0; line-height: 1.3; }
+        .connector { font-size: 1.6rem; font-weight: normal; margin: 0 4px; vertical-align: middle; }
         
-        .advice-box { border: 4px solid #000; border-radius: 15px; padding: 15px; margin: 5px 20px; text-align: left; font-weight: bold; }
-        .advice-item { font-size: 1.8rem; margin: 10px 0; display: flex; align-items: center; padding: 0 5px; }
-        .text-icon { font-size: 1.8rem; margin-right: 15px; min-width: 0; width: auto; text-align: center; font-weight: normal; white-space: nowrap; }
+        .temp-container { margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+        .temp { font-size: 3.0rem; font-weight: bold; }
+        .humidity { font-size: 1.7rem; font-weight: normal; margin-top: 5px; }
+        
+        .advice-box { border: 3px solid #000; border-radius: 10px; padding: 10px; margin: 0 15px; text-align: left; font-weight: bold; }
+        .advice-item { font-size: 1.6rem; margin: 8px 0; display: flex; align-items: center; padding: 0 5px; }
+        .text-icon { font-size: 1.6rem; margin-right: 10px; text-align: center; font-weight: normal; white-space: nowrap; }
         #umbrellaText, #clothesText { word-break: break-all; flex: 1; }
 
-        /* アドバイスボックスの下に配置する運行情報用スタイル */
-        .train-info {
-            font-size: 1.8rem;
+        /* 追加情報（電車・カウントダウン）のエリア */
+        .extra-info-box {
+            margin: 15px 15px 10px 15px;
+            text-align: left;
             font-weight: bold;
-            margin-top: 15px;
-            padding: 0 20px;
+            font-size: 1.6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .extra-item {
+            border-bottom: 1px dashed #000;
+            padding-bottom: 5px;
         }
     </style>
 </head>
@@ -62,14 +64,16 @@
     </div>
 
     <div class="main-content">
-        <div class="weather" id="weatherText"></div>
-        
-        <div class="temp-container">
-            <div class="temp">
-                <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
-            </div>
-            <div class="humidity" id="humidityText">
-                (湿度 --% / 風速 --m/s)
+        <div>
+            <div class="weather" id="weatherText"></div>
+            
+            <div class="temp-container">
+                <div class="temp">
+                    <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
+                </div>
+                <div class="humidity" id="humidityText">
+                    (湿度 --% / 風速 --m/s)
+                </div>
             </div>
         </div>
 
@@ -84,7 +88,10 @@
             </div>
         </div>
 
-        <div class="train-info" id="trainText">・ 運行情報確認中...</div>
+        <div class="extra-info-box">
+            <div class="extra-item" id="trainText">・ 運行情報確認中...</div>
+            <div class="extra-item" id="countdownText">・ カウントダウン計算中...</div>
+        </div>
     </div>
 
     <script>
@@ -94,12 +101,12 @@
                 updateTimeEl.innerText = "更新中...";
 
                 const uniqueTime = new Date().getTime();
-                // 東京の天気エリアコード(130000)
-                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json?_=" + uniqueTime;
-                // 東京の緯度・経度
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
+                // 横浜の天気エリアコード(140000)
+                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
+                // 横浜の緯度・経度
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
-                // 1. 気象庁データ取得
+                // 1. 気象庁データ取得と日付・天気の処理
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
@@ -165,7 +172,7 @@
                     document.getElementById('maxTemp').innerText = "--";
                 }
 
-                // 3. 東海道線の遅延チェック（絵文字排除版）
+                // 3. 東海道線の遅延チェック（記号版）
                 try {
                     const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
                     const trainRes = await fetch(trainUrl);
@@ -189,6 +196,26 @@
                     }
                 } catch (e) {
                     document.getElementById('trainText').innerText = "× 運行情報が取得できません";
+                }
+
+                // 4. 中学受験カウントダウン（例として2027年2月1日を設定）
+                try {
+                    const targetDate = new Date('2027-02-01T00:00:00+09:00');
+                    const todayForCount = new Date();
+                    
+                    const diffTime = targetDate - todayForCount;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    const countdownEl = document.getElementById('countdownText');
+                    if (diffDays > 0) {
+                        countdownEl.innerText = `中学受験(2/1)まで あと ${diffDays} 日！`;
+                    } else if (diffDays === 0) {
+                        countdownEl.innerText = `いよいよ本番！全力を出し切れ！`;
+                    } else {
+                        countdownEl.innerText = `受験お疲れ様でした！`;
+                    }
+                } catch (e) {
+                    document.getElementById('countdownText').innerText = "";
                 }
 
                 updateTimeEl.innerText = `${h}:${m} 更新`;
