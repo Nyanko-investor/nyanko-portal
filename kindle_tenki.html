@@ -20,7 +20,6 @@
 
         .header-container { margin-top: 10px; padding: 0 10px; }
         .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
-        /* ★ 日付の文字を 2.0rem → 2.3rem に拡大し、下の隙間を少し詰めて高さを吸収 */
         .date { font-size: 2.3rem; font-weight: bold; margin-bottom: 2px; } 
         .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; }
         
@@ -234,7 +233,8 @@
                     const fxRes = await fetch(fxUrl);
                     const fxData = await fxRes.json();
                     
-                    const usdjpy = Math.round(fxData.rates.JPY * 10) / 10;
+                    // ▼ ここを変更：小数点第2位まで表示（例: 151.25）
+                    const usdjpy = fxData.rates.JPY.toFixed(2);
                     
                     const fxDate = new Date(fxData.time_last_update_unix * 1000);
                     const fxMonth = fxDate.getMonth() + 1;
