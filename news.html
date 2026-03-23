@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="21600">
+    <title>Nyanko News Kindle</title>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 15px;
+        }
+        
+        /* ヘッダーと戻るボタン */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #000000;
+            border: 2px solid #000;
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+        .page-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+
+        /* ニュースのセクションごとのデザイン */
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background-color: #000;
+            color: #fff;
+            padding: 5px 15px;
+            display: inline-block;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        .news-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+        }
+        .news-item {
+            font-size: 2.0rem;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #666;
+            padding-bottom: 15px;
+            font-weight: bold;
+        }
+        .news-date {
+            font-size: 1.4rem;
+            color: #333;
+            margin-top: 8px;
+            font-weight: normal;
+        }
+        .error {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="kindle_tenki.html" class="back-link">← 天気に戻る</a>
+        <div class="page-title">朝のニュース</div>
+    </div>
+
+    <div class="section-title">📰 主要ニュース</div>
+    <ul class="news-list" id="generalContainer">
+        <li class="news-item">ニュースを取得中...</li>
+    </ul>
+
+    <div class="section-title">📈 経済・ビジネス</div>
+    <ul class="news-list" id="bizContainer">
+        <li class="news-item">ニュースを取得中...</li>
+    </ul>
+
+    <script>
+        async function fetchNewsData(rssUrl, containerId) {
+            try {
+                const uniqueTime = new Date().getTime();
+                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&_=${uniqueTime}`;
+
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                const container = document.getElementById(containerId);
+                container.innerHTML = ""; 
+
+                if (data.items && data.items.length > 0) {
+                    // 上位3件だけを抽出
+                    const limit = Math.min(data.items.length, 3);
+                    for (let i = 0; i < limit; i++) {
+                        const item = data.items[i];
+                        
+                        const pubDate = new Date(item.pubDate.replace(/-/g, '/'));
+                        const h = pubDate.getHours().toString().padStart(2, '0');
+                        const m = pubDate.getMinutes().toString().padStart(2, '0');
+
+                        const li = document.createElement('li');
+                        li.className = 'news-item';
+                        li.innerHTML = `
+                            <div>・${item.title}</div>
+                            <div class="news-date">(${h}:${m} 配信)</div>
+                        `;
+                        container.appendChild(li);
+                    }
+                } else {
+                    container.innerHTML = "<li class='news-item error'>ニュースが見つかりませんでした</li>";
+                }
+            } catch (error) {
+                document.getElementById(containerId).innerHTML = "<li class='news-item error'>取得エラーが発生しました</li>";
+            }
+        }
+
+        // 一般ニュース（主要トピックス）を取得
+        fetchNewsData("https://news.yahoo.co.jp/rss/topics/top-picks.xml", "generalContainer");
+        
+        // 経済ニュース（ビジネス）を取得
+        fetchNewsData("https://news.yahoo.co.jp/rss/topics/business.xml", "bizContainer");
+
+    </script>
+</body>
+</html>
