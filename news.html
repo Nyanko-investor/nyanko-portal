@@ -85,11 +85,6 @@
         <li class="news-item">ニュースを取得中...</li>
     </ul>
 
-    <div class="section-title">📈 経済・ビジネス</div>
-    <ul class="news-list" id="bizContainer">
-        <li class="news-item">ニュースを取得中...</li>
-    </ul>
-
     <script>
         async function fetchNewsData(rssUrl, containerId) {
             try {
@@ -103,11 +98,11 @@
                 container.innerHTML = ""; 
 
                 if (data.items && data.items.length > 0) {
-                    const limit = Math.min(data.items.length, 3);
+                    // 経済ニュースをなくした分、主要ニュースを6件表示します
+                    const limit = Math.min(data.items.length, 6);
                     for (let i = 0; i < limit; i++) {
                         const item = data.items[i];
                         
-                        // タイトルからサイト名（ - NHKニュースなど）を綺麗に取り除く処理
                         let cleanTitle = item.title.split(" - ")[0];
                         
                         const pubDate = new Date(item.pubDate.replace(/-/g, '/'));
@@ -130,9 +125,8 @@
             }
         }
 
-        // ▼ Googleニュース（国内の真面目なニュース）に変更 ▼
+        // Googleニュース（国内トップ）を取得
         fetchNewsData("https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja", "generalContainer");
-        fetchNewsData("https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ja&gl=JP&ceid=JP:ja", "bizContainer");
 
     </script>
 </body>
