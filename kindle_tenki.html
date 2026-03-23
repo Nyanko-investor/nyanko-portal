@@ -51,7 +51,6 @@
             text-overflow: ellipsis; 
         }
 
-        /* ▼ 修正: 上の余白を減らし(0)、下の余白を広げました(25px) ▼ */
         .extra-info-box {
             margin: 0px 15px 25px 15px; 
             text-align: left;
@@ -124,13 +123,16 @@
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
+                // ▼ Kindleのタイムゾーン無視！絶対日本時間(JST)計算システム ▼
                 const now = new Date();
-                const year = now.getFullYear();
-                const month = now.getMonth() + 1;
-                const day = now.getDate();
-                const h = now.getHours().toString().padStart(2, '0');
-                const m = now.getMinutes().toString().padStart(2, '0');
-                const dayStr = ['日', '月', '火', '水', '木', '金', '土'][now.getDay()];
+                const jstNow = new Date(now.getTime() + 32400000); // 1970年からのミリ秒に9時間(32,400,000ms)を加算
+                
+                const year = jstNow.getUTCFullYear();
+                const month = jstNow.getUTCMonth() + 1;
+                const day = jstNow.getUTCDate();
+                const h = jstNow.getUTCHours().toString().padStart(2, '0');
+                const m = jstNow.getUTCMinutes().toString().padStart(2, '0');
+                const dayStr = ['日', '月', '火', '水', '木', '金', '土'][jstNow.getUTCDay()];
                 const reiwa = year - 2018; 
                 
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
@@ -233,13 +235,14 @@
                     
                     const usdjpy = fxData.rates.JPY.toFixed(2);
                     
-                    const utcDate = new Date(fxData.time_last_update_unix * 1000);
-                    const jstDate = new Date(utcDate.getTime() + 32400000); 
+                    // ▼ 為替も絶対日本時間(JST)計算システムを適用 ▼
+                    const fxUtc = new Date(fxData.time_last_update_unix * 1000);
+                    const fxJst = new Date(fxUtc.getTime() + 32400000); 
                     
-                    const fxMonth = jstDate.getUTCMonth() + 1;
-                    const fxDay = jstDate.getUTCDate();
-                    const fxHour = jstDate.getUTCHours().toString().padStart(2, '0');
-                    const fxMin = jstDate.getUTCMinutes().toString().padStart(2, '0');
+                    const fxMonth = fxJst.getUTCMonth() + 1;
+                    const fxDay = fxJst.getUTCDate();
+                    const fxHour = fxJst.getUTCHours().toString().padStart(2, '0');
+                    const fxMin = fxJst.getUTCMinutes().toString().padStart(2, '0');
                     
                     document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxMonth}月${fxDay}日 ${fxHour}:${fxMin} 時点)`;
                     document.getElementById('nasdaqText').innerText = `・NASDAQ: --- (要API)`;
