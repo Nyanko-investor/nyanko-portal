@@ -22,7 +22,6 @@
         .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 5px; }
         .date { font-size: 2.3rem; font-weight: bold; margin-bottom: 2px; } 
         .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; margin-bottom: 5px;}
-        /* ▼ カウントダウン用の新しいスタイルを追加 ▼ */
         .header-countdown { font-size: 1.8rem; font-weight: bold; margin-top: 2px; }
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
@@ -107,6 +106,7 @@
             <div id="trainText">・運行情報確認中...</div>
             <div id="usdText">・USD/JPY: 取得中...</div>
             <div id="nasdaqText">・NASDAQ: 取得中...</div>
+            <div><a href="news.html" style="color: #000; text-decoration: none; border-bottom: 1px solid #000;">・今日のニュースを読む →</a></div>
         </div>
     </div>
 
@@ -211,7 +211,6 @@
                     document.getElementById('trainText').innerText = "・運行情報が取得できません";
                 }
 
-                // ▼ カウントダウンの文言と先頭の「・」を修正しました ▼
                 try {
                     const targetDate = new Date('2027-02-01T00:00:00+09:00');
                     const todayForCount = new Date();
