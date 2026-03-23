@@ -19,9 +19,11 @@
         }
 
         .header-container { margin-top: 10px; padding: 0 10px; }
-        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
+        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 5px; }
         .date { font-size: 2.3rem; font-weight: bold; margin-bottom: 2px; } 
-        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; }
+        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; margin-bottom: 5px;}
+        /* ▼ カウントダウン用の新しいスタイルを追加 ▼ */
+        .header-countdown { font-size: 1.8rem; font-weight: bold; margin-top: 2px; }
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
@@ -72,6 +74,7 @@
         <div class="header">
             <div class="date" id="dateText">----年(令和-年) -月-日(-)</div>
             <div class="time" id="updateTime">--:-- 更新</div>
+            <div class="header-countdown" id="countdownText">受験本番まで計算中...</div>
         </div>
     </div>
 
@@ -102,7 +105,6 @@
 
         <div class="extra-info-box">
             <div id="trainText">・運行情報確認中...</div>
-            <div id="countdownText">・カウントダウン計算中...</div>
             <div id="usdText">・USD/JPY: 取得中...</div>
             <div id="nasdaqText">・NASDAQ: 取得中...</div>
         </div>
@@ -146,13 +148,13 @@
                 htmlWeather = htmlWeather.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
-                if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
-                    if (cleanWeather.includes('一時') || cleanWeather.includes('のち') || cleanWeather.includes('ところにより')) {
-                        document.getElementById('umbrellaText').innerText = "折りたたみ傘があると安心！";
-                    } else {
-                        document.getElementById('umbrellaText').innerText = "忘れないで持っていこう！";
-                    }
-                } else {
+                if (cleanWeather.startsWith('雨') || cleanWeather.startsWith('雪')) {
+                    document.getElementById('umbrellaText').innerText = "傘を忘れないで持っていこう！";
+                } 
+                else if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
+                    document.getElementById('umbrellaText').innerText = "折りたたみ傘があると安心！";
+                } 
+                else {
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
@@ -209,6 +211,7 @@
                     document.getElementById('trainText').innerText = "・運行情報が取得できません";
                 }
 
+                // ▼ カウントダウンの文言と先頭の「・」を修正しました ▼
                 try {
                     const targetDate = new Date('2027-02-01T00:00:00+09:00');
                     const todayForCount = new Date();
@@ -218,11 +221,11 @@
                     
                     const countdownEl = document.getElementById('countdownText');
                     if (diffDays > 0) {
-                        countdownEl.innerText = `・受験まで あと${diffDays}日！`;
+                        countdownEl.innerText = `受験本番まで あと${diffDays}日！`;
                     } else if (diffDays === 0) {
-                        countdownEl.innerText = `・いよいよ本番！全力を出し切れ！`;
+                        countdownEl.innerText = `いよいよ本番！全力を出し切れ！`;
                     } else {
-                        countdownEl.innerText = `・受験お疲れ様でした！`;
+                        countdownEl.innerText = `受験お疲れ様でした！`;
                     }
                 } catch (e) {
                     document.getElementById('countdownText').innerText = "";
@@ -233,7 +236,6 @@
                     const fxRes = await fetch(fxUrl);
                     const fxData = await fxRes.json();
                     
-                    // ▼ ここを変更：小数点第2位まで表示（例: 151.25）
                     const usdjpy = fxData.rates.JPY.toFixed(2);
                     
                     const fxDate = new Date(fxData.time_last_update_unix * 1000);
