@@ -231,10 +231,10 @@
                 }
 
                 try {
+                    // 為替の取得
                     const fxUrl = "https://open.er-api.com/v6/latest/USD";
                     const fxRes = await fetch(fxUrl);
                     const fxData = await fxRes.json();
-                    
                     const usdjpy = fxData.rates.JPY.toFixed(2);
                     
                     const fxDate = new Date(fxData.time_last_update_unix * 1000);
@@ -244,10 +244,25 @@
                     const fxMin = fxDate.getMinutes().toString().padStart(2, '0');
                     
                     document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxMonth}月${fxDay}日 ${fxHour}:${fxMin} 時点)`;
-                    document.getElementById('nasdaqText').innerText = `・NASDAQ: --- (要API)`;
+
+                    // ▼ NASDAQ(QQQ)の取得 ▼
+                    const apiKey = "D70c779r01qtb4ra7rn0d70c779r01qtb4ra7rng";
+                    const stockUrl = `https://finnhub.io/api/v1/quote?symbol=QQQ&token=${apiKey}`;
+                    const stockRes = await fetch(stockUrl);
+                    const stockData = await stockRes.json();
+                    
+                    if (stockData && stockData.c) {
+                        const qqqPrice = stockData.c.toFixed(2);
+                        const qqqChange = stockData.dp.toFixed(2);
+                        const sign = qqqChange >= 0 ? "+" : "";
+                        document.getElementById('nasdaqText').innerText = `・NASDAQ(QQQ): $${qqqPrice} (${sign}${qqqChange}%)`;
+                    } else {
+                        document.getElementById('nasdaqText').innerText = "・NASDAQ(QQQ): 取得失敗";
+                    }
+
                 } catch (e) {
                     document.getElementById('usdText').innerText = "・為替情報が取得できません";
-                    document.getElementById('nasdaqText').innerText = "";
+                    document.getElementById('nasdaqText').innerText = "・株価情報が取得できません";
                 }
 
                 updateTimeEl.innerText = `${h}:${m} 更新`;
