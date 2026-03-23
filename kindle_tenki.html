@@ -6,28 +6,69 @@
     <meta http-equiv="refresh" content="21600">
     <title>Nyanko Portal Kindle</title>
     <style>
-        body { background-color: #ffffff; color: #000000; font-family: sans-serif; text-align: center; margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; }
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .header-container { margin-top: 10px; padding: 0 10px; }
         .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 5px; }
         .date { font-size: 2.3rem; font-weight: bold; margin-bottom: 2px; } 
         .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; margin-bottom: 5px;}
         .header-countdown { font-size: 1.8rem; font-weight: bold; margin-top: 2px; }
+        
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        
         .weather { font-size: 3.5rem; font-weight: bold; margin: 5px 0; line-height: 1.2; } 
         .connector { font-size: 1.8rem; font-weight: normal; margin: 0 4px; vertical-align: middle; }
+        
         .temp-container { margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .temp { font-size: 3.0rem; font-weight: bold; }
         .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 5px; }
+        
         .advice-box { border: 3px solid #000; border-radius: 10px; padding: 6px; margin: 0 15px; text-align: left; font-weight: bold; }
-        .advice-item { font-size: 1.7rem; margin: 4px 0; display: flex; align-items: center; padding: 0 5px; white-space: nowrap; overflow: hidden; }
+        .advice-item {
+            font-size: 1.7rem; 
+            margin: 4px 0; 
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            white-space: nowrap; 
+            overflow: hidden; 
+        }
         .text-icon { font-size: 1.7rem; margin-right: 8px; text-align: center; font-weight: normal; white-space: nowrap; }
-        .extra-info-box { margin: 10px 15px 10px 15px; text-align: left; font-weight: bold; font-size: 1.7rem; display: flex; flex-direction: column; }
-        .extra-info-box div { margin-bottom: 12px; }
-        .extra-info-box div:last-child { margin-bottom: 0; }
-        a { color: #000; text-decoration: none; border-bottom: 2px solid #000; }
+        #umbrellaText, #clothesText { 
+            flex: 1; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+
+        .extra-info-box {
+            margin: 10px 15px 10px 15px; 
+            text-align: left;
+            font-weight: bold;
+            font-size: 1.7rem; 
+            display: flex;
+            flex-direction: column;
+        }
+        .extra-info-box div {
+            margin-bottom: 12px; 
+        }
+        .extra-info-box div:last-child {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
+
     <div class="header-container">
         <div class="header">
             <div class="date" id="dateText">----年(令和-年) -月-日(-)</div>
@@ -35,23 +76,37 @@
             <div class="header-countdown" id="countdownText">受験本番まで計算中...</div>
         </div>
     </div>
+
     <div class="main-content">
         <div>
             <div class="weather" id="weatherText"></div>
+            
             <div class="temp-container">
-                <div class="temp"><span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃</div>
-                <div class="humidity" id="humidityText">(湿度 --% / 風速 --m/s)</div>
+                <div class="temp">
+                    <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
+                </div>
+                <div class="humidity" id="humidityText">
+                    (湿度 --% / 風速 --m/s)
+                </div>
             </div>
         </div>
+
         <div class="advice-box">
-            <div class="advice-item"><span class="text-icon">[雨傘]</span><span id="umbrellaText">確認中...</span></div>
-            <div class="advice-item"><span class="text-icon">[服装]</span><span id="clothesText">確認中...</span></div>
+            <div class="advice-item">
+                <span class="text-icon">[雨傘]</span>
+                <span id="umbrellaText">確認中...</span>
+            </div>
+            <div class="advice-item">
+                <span class="text-icon">[服装]</span>
+                <span id="clothesText">確認中...</span>
+            </div>
         </div>
+
         <div class="extra-info-box">
             <div id="trainText">・運行情報確認中...</div>
             <div id="usdText">・USD/JPY: 取得中...</div>
             <div id="nasdaqText">・NASDAQ: 取得中...</div>
-            <div><a href="news.html">・今日のニュースを読む →</a></div>
+            <div><a href="news.html" style="color: #000; text-decoration: none; border-bottom: 1px solid #000;">・今日のニュースを読む →</a></div>
         </div>
     </div>
 
@@ -60,78 +115,156 @@
             try {
                 const updateTimeEl = document.getElementById('updateTime');
                 updateTimeEl.innerText = "更新中...";
+
                 const uniqueTime = new Date().getTime();
-                
-                // 日付・天気の基本処理
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
+
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = now.getMonth() + 1;
-                const day = now.getDate();
+
+                const options = { timeZone: 'Asia/Tokyo', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+                const formatter = new Intl.DateTimeFormat('ja-JP', options);
+                const parts = formatter.formatToParts(new Date());
+                const year = parseInt(parts.find(p => p.type === 'year').value);
+                const month = parseInt(parts.find(p => p.type === 'month').value);
+                const day = parseInt(parts.find(p => p.type === 'day').value);
+                const h = parts.find(p => p.type === 'hour').value;
+                const m = parts.find(p => p.type === 'minute').value;
+
+                const dateObj = new Date(year, month - 1, day);
+                const reiwa = year - 2018; 
                 const days = ['日', '月', '火', '水', '木', '金', '土'];
-                document.getElementById('dateText').innerText = year + "年(令和" + (year-2018) + "年) " + month + "月" + day + "日(" + days[now.getDay()] + ")";
+                const dayStr = days[dateObj.getDay()];
                 
-                let cleanWeather = data[0].timeSeries[0].areas[0].weathers[0].replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
-                document.getElementById('weatherText').innerHTML = cleanWeather.replace(/(のち|時々|ときどき|一時)/g, '<br><span class="connector">$1</span>');
-                document.getElementById('umbrellaText').innerText = cleanWeather.includes('雨') || cleanWeather.includes('雪') ? "傘を持っていこう！" : "今日は不要だよ！";
+                document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
+                
+                let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
+                let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
+                
+                const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
+                let htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
+                
+                htmlWeather = htmlWeather.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
+                document.getElementById('weatherText').innerHTML = htmlWeather;
 
-                // 気温
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
-                const meteoRes = await fetch(meteoUrl);
-                const meteoData = await meteoRes.json();
-                const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
-                document.getElementById('minTemp').innerText = Math.round(meteoData.daily.temperature_2m_min[0]);
-                document.getElementById('maxTemp').innerText = maxT;
-                document.getElementById('humidityText').innerText = "(湿度 " + meteoData.current.relative_humidity_2m + "% / 風速 " + meteoData.current.wind_speed_10m + "m/s)";
-                document.getElementById('clothesText').innerText = maxT >= 25 ? "半そで！" : maxT >= 20 ? "長そでシャツ！" : maxT >= 15 ? "上着が必要！" : "コートを着てね！";
-
-                // 運行情報
-                const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
-                const trainRes = await fetch(trainUrl);
-                const trainData = await trainRes.json();
-                const isDelayed = trainData.items && trainData.items.some(function(item){ return item.title.indexOf("東海道") !== -1; });
-                document.getElementById('trainText').innerText = isDelayed ? "・東海道線に遅れあり" : "・東海道線は平常運転";
-
-                // カウントダウン
-                const diffDays = Math.ceil((new Date('2027-02-01') - new Date()) / (1000 * 60 * 60 * 24));
-                document.getElementById('countdownText').innerText = diffDays > 0 ? "受験本番まで あと" + diffDays + "日！" : "全力を出し切れ！";
-
-                // 為替
-                const fxRes = await fetch("https://open.er-api.com/v6/latest/USD");
-                const fxData = await fxRes.json();
-                document.getElementById('usdText').innerText = "・USD/JPY: " + fxData.rates.JPY.toFixed(2) + "円";
-
-                // ▼ NASDAQ(QQQ) 修正：バックルを使わない古い書き方に統一 ▼
-                try {
-                    // ここが間違っている可能性を考え、後半のキーを使用
-                    var myKey = "d70c779r01qtb4ra7rng"; 
-                    var stockUrl = "https://finnhub.io/api/v1/quote?symbol=QQQ&token=" + myKey;
-                    
-                    const stockRes = await fetch(stockUrl);
-                    const stockData = await stockRes.json();
-                    
-                    if (stockData && stockData.c) {
-                        var change = stockData.dp.toFixed(2);
-                        var sign = change >= 0 ? "+" : "";
-                        document.getElementById('nasdaqText').innerText = "・NASDAQ(QQQ): $" + stockData.c.toFixed(2) + " (" + sign + change + "%)";
-                    } else {
-                        document.getElementById('nasdaqText').innerText = "・NASDAQ(QQQ): キーを確認してください";
-                    }
-                } catch (stockError) {
-                    document.getElementById('nasdaqText').innerText = "・NASDAQ(QQQ): 接続エラー";
+                if (cleanWeather.startsWith('雨') || cleanWeather.startsWith('雪')) {
+                    document.getElementById('umbrellaText').innerText = "傘を忘れないで持っていこう！";
+                } 
+                else if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
+                    document.getElementById('umbrellaText').innerText = "折りたたみ傘があると安心！";
+                } 
+                else {
+                    document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                updateTimeEl.innerText = now.getHours() + ":" + ("0" + now.getMinutes()).slice(-2) + " 更新";
-            } catch (e) {
-                console.error(e);
+                try {
+                    const meteoRes = await fetch(meteoUrl);
+                    const meteoData = await meteoRes.json();
+                    
+                    const humidity = meteoData.current.relative_humidity_2m;
+                    const wind = meteoData.current.wind_speed_10m; 
+                    document.getElementById('humidityText').innerText = `(湿度 ${humidity}% / 風速 ${wind}m/s)`;
+
+                    const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
+                    const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
+                    
+                    document.getElementById('minTemp').innerText = minT;
+                    document.getElementById('maxTemp').innerText = maxT;
+
+                    let clothesMsg = "";
+                    if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
+                    else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
+                    else if (maxT >= 15) { clothesMsg = "上着を持っていこう！"; } 
+                    else if (maxT >= 10) { clothesMsg = "セーターかコートを着てね！"; } 
+                    else { clothesMsg = "ダウンや手ぶくろで暖かく！"; }
+                    document.getElementById('clothesText').innerText = clothesMsg;
+
+                } catch (e) {
+                    document.getElementById('humidityText').innerText = "(湿度 --% / 風速 --m/s)";
+                    document.getElementById('minTemp').innerText = "--";
+                    document.getElementById('maxTemp').innerText = "--";
+                }
+
+                try {
+                    const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
+                    const trainRes = await fetch(trainUrl);
+                    const trainData = await trainRes.json();
+                    
+                    let isDelayed = false;
+                    if (trainData.items) {
+                        for (let item of trainData.items) {
+                            if (item.title.includes("東海道")) {
+                                isDelayed = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    const trainEl = document.getElementById('trainText');
+                    if (isDelayed) {
+                        trainEl.innerText = "・東海道線に遅れが出ています";
+                    } else {
+                        trainEl.innerText = "・東海道線は平常運転です";
+                    }
+                } catch (e) {
+                    document.getElementById('trainText').innerText = "・運行情報が取得できません";
+                }
+
+                try {
+                    const targetDate = new Date('2027-02-01T00:00:00+09:00');
+                    const todayForCount = new Date();
+                    
+                    const diffTime = targetDate - todayForCount;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    const countdownEl = document.getElementById('countdownText');
+                    if (diffDays > 0) {
+                        countdownEl.innerText = `受験本番まで あと${diffDays}日！`;
+                    } else if (diffDays === 0) {
+                        countdownEl.innerText = `いよいよ本番！全力を出し切れ！`;
+                    } else {
+                        countdownEl.innerText = `受験お疲れ様でした！`;
+                    }
+                } catch (e) {
+                    document.getElementById('countdownText').innerText = "";
+                }
+
+                try {
+                    const fxUrl = "https://open.er-api.com/v6/latest/USD";
+                    const fxRes = await fetch(fxUrl);
+                    const fxData = await fxRes.json();
+                    
+                    const usdjpy = fxData.rates.JPY.toFixed(2);
+                    
+                    const fxDate = new Date(fxData.time_last_update_unix * 1000);
+                    const fxMonth = fxDate.getMonth() + 1;
+                    const fxDay = fxDate.getDate();
+                    const fxHour = fxDate.getHours().toString().padStart(2, '0');
+                    const fxMin = fxDate.getMinutes().toString().padStart(2, '0');
+                    
+                    document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxMonth}月${fxDay}日 ${fxHour}:${fxMin} 時点)`;
+                    document.getElementById('nasdaqText').innerText = `・NASDAQ: --- (要API)`;
+                } catch (e) {
+                    document.getElementById('usdText').innerText = "・為替情報が取得できません";
+                    document.getElementById('nasdaqText').innerText = "";
+                }
+
+                updateTimeEl.innerText = `${h}:${m} 更新`;
+
+            } catch (error) {
+                document.getElementById('weatherText').innerText = "エラーが起きました";
+                document.getElementById('updateTime').innerText = "更新失敗";
             }
         }
 
         fetchWeather();
         setInterval(fetchWeather, 7200000);
-        setTimeout(function(){ location.reload(); }, 21600000);
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 21600000); 
+
     </script>
 </body>
 </html>
