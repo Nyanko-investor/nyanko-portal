@@ -14,7 +14,6 @@
             padding: 15px;
         }
         
-        /* ヘッダーと戻るボタン */
         .header {
             display: flex;
             justify-content: space-between;
@@ -38,7 +37,6 @@
             font-weight: bold;
         }
 
-        /* ニュースのセクションごとのデザイン */
         .section-title {
             font-size: 2.2rem;
             font-weight: bold;
@@ -105,10 +103,12 @@
                 container.innerHTML = ""; 
 
                 if (data.items && data.items.length > 0) {
-                    // 上位3件だけを抽出
                     const limit = Math.min(data.items.length, 3);
                     for (let i = 0; i < limit; i++) {
                         const item = data.items[i];
+                        
+                        // タイトルからサイト名（ - NHKニュースなど）を綺麗に取り除く処理
+                        let cleanTitle = item.title.split(" - ")[0];
                         
                         const pubDate = new Date(item.pubDate.replace(/-/g, '/'));
                         const h = pubDate.getHours().toString().padStart(2, '0');
@@ -117,7 +117,7 @@
                         const li = document.createElement('li');
                         li.className = 'news-item';
                         li.innerHTML = `
-                            <div>・${item.title}</div>
+                            <div>・${cleanTitle}</div>
                             <div class="news-date">(${h}:${m} 配信)</div>
                         `;
                         container.appendChild(li);
@@ -130,117 +130,9 @@
             }
         }
 
-        // ▼ 取得元をNHKに変更しました ▼
-        // 一般ニュース（NHK 主要ニュース）を取得
-        fetchNewsData("https://www.nhk.or.jp/rss/news/cat0.xml", "generalContainer");
-        
-        // 経済ニュース（NHK 経済ニュース）を取得
-        fetchNewsData("https://www.nhk.or.jp/rss/news/cat5.xml", "bizContainer");
-
-    </script>
-</body>
-</html>
-            font-size: 2.2rem;
-            font-weight: bold;
-        }
-
-        /* ニュースのセクションごとのデザイン */
-        .section-title {
-            font-size: 2.2rem;
-            font-weight: bold;
-            background-color: #000;
-            color: #fff;
-            padding: 5px 15px;
-            display: inline-block;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            margin-top: 10px;
-        }
-        .news-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0 0 30px 0;
-        }
-        .news-item {
-            font-size: 2.0rem;
-            line-height: 1.4;
-            margin-bottom: 20px;
-            border-bottom: 1px dashed #666;
-            padding-bottom: 15px;
-            font-weight: bold;
-        }
-        .news-date {
-            font-size: 1.4rem;
-            color: #333;
-            margin-top: 8px;
-            font-weight: normal;
-        }
-        .error {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <a href="kindle_tenki.html" class="back-link">← 天気に戻る</a>
-        <div class="page-title">朝のニュース</div>
-    </div>
-
-    <div class="section-title">📰 主要ニュース</div>
-    <ul class="news-list" id="generalContainer">
-        <li class="news-item">ニュースを取得中...</li>
-    </ul>
-
-    <div class="section-title">📈 経済・ビジネス</div>
-    <ul class="news-list" id="bizContainer">
-        <li class="news-item">ニュースを取得中...</li>
-    </ul>
-
-    <script>
-        async function fetchNewsData(rssUrl, containerId) {
-            try {
-                const uniqueTime = new Date().getTime();
-                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&_=${uniqueTime}`;
-
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-
-                const container = document.getElementById(containerId);
-                container.innerHTML = ""; 
-
-                if (data.items && data.items.length > 0) {
-                    // 上位3件だけを抽出
-                    const limit = Math.min(data.items.length, 3);
-                    for (let i = 0; i < limit; i++) {
-                        const item = data.items[i];
-                        
-                        const pubDate = new Date(item.pubDate.replace(/-/g, '/'));
-                        const h = pubDate.getHours().toString().padStart(2, '0');
-                        const m = pubDate.getMinutes().toString().padStart(2, '0');
-
-                        const li = document.createElement('li');
-                        li.className = 'news-item';
-                        li.innerHTML = `
-                            <div>・${item.title}</div>
-                            <div class="news-date">(${h}:${m} 配信)</div>
-                        `;
-                        container.appendChild(li);
-                    }
-                } else {
-                    container.innerHTML = "<li class='news-item error'>ニュースが見つかりませんでした</li>";
-                }
-            } catch (error) {
-                document.getElementById(containerId).innerHTML = "<li class='news-item error'>取得エラーが発生しました</li>";
-            }
-        }
-
-        // 一般ニュース（主要トピックス）を取得
-        fetchNewsData("https://news.yahoo.co.jp/rss/topics/top-picks.xml", "generalContainer");
-        
-        // 経済ニュース（ビジネス）を取得
-        fetchNewsData("https://news.yahoo.co.jp/rss/topics/business.xml", "bizContainer");
+        // ▼ Googleニュース（国内の真面目なニュース）に変更 ▼
+        fetchNewsData("https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja", "generalContainer");
+        fetchNewsData("https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ja&gl=JP&ceid=JP:ja", "bizContainer");
 
     </script>
 </body>
