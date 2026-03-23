@@ -19,11 +19,13 @@
         }
 
         .header-container { margin-top: 10px; padding: 0 10px; }
-        /* ▼ 横線の上下の余白（padding-bottomとmargin-bottom）を広げました ▼ */
         .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 15px; }
-        .date { font-size: 2.3rem; font-weight: bold; margin-bottom: 2px; } 
-        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; margin-bottom: 5px;}
-        .header-countdown { font-size: 1.8rem; font-weight: bold; margin-top: 2px; }
+        /* ▼ 年月日をちょびっと拡大 ▼ */
+        .date { font-size: 2.5rem; font-weight: bold; margin-bottom: 2px; } 
+        /* ▼ 更新時間の上下の隙間を拡大 ▼ */
+        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; margin-top: 8px; margin-bottom: 10px;}
+        /* ▼ カウントダウンをちょびっと拡大 ▼ */
+        .header-countdown { font-size: 2.0rem; font-weight: bold; margin-top: 2px; }
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
@@ -35,7 +37,6 @@
         .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 5px; }
         
         .advice-box { border: 3px solid #000; border-radius: 10px; padding: 6px; margin: 0 15px; text-align: left; font-weight: bold; }
-        /* ▼ アドバイス欄の文字サイズを 1.7rem から 1.9rem に拡大 ▼ */
         .advice-item {
             font-size: 1.9rem; 
             margin: 6px 0; 
@@ -142,9 +143,10 @@
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
                 
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
-                let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
-                // ▼ 正規表現に「ところにより」を追加しました ▼
+                // ▼ 修正：「所により」をひらがなに変換 ▼
+                let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち').replace(/所により/g, 'ところにより');
+                
                 const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
                 let htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
                 
@@ -240,11 +242,15 @@
                     
                     const usdjpy = fxData.rates.JPY.toFixed(2);
                     
-                    const fxDate = new Date(fxData.time_last_update_unix * 1000);
-                    const fxMonth = fxDate.getMonth() + 1;
-                    const fxDay = fxDate.getDate();
-                    const fxHour = fxDate.getHours().toString().padStart(2, '0');
-                    const fxMin = fxDate.getMinutes().toString().padStart(2, '0');
+                    // ▼ Kindleのタイムゾーンズレを完全に防ぐため、UTC基準で日本時間を強制計算 ▼
+                    const utcDate = new Date(fxData.time_last_update_unix * 1000);
+                    // UTCに9時間分（32,400,000ミリ秒）を足して日本時間にする
+                    const jstDate = new Date(utcDate.getTime() + 32400000); 
+                    
+                    const fxMonth = jstDate.getUTCMonth() + 1;
+                    const fxDay = jstDate.getUTCDate();
+                    const fxHour = jstDate.getUTCHours().toString().padStart(2, '0');
+                    const fxMin = jstDate.getUTCMinutes().toString().padStart(2, '0');
                     
                     document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxMonth}月${fxDay}日 ${fxHour}:${fxMin} 時点)`;
                     document.getElementById('nasdaqText').innerText = `・NASDAQ: --- (要API)`;
