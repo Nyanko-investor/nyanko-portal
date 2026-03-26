@@ -169,10 +169,13 @@
                 const tDayStr = ['日', '月', '火', '水', '木', '金', '土'][tomorrow.getUTCDay()];
                 document.getElementById('tomorrowDate').innerText = `${tMonth}月${tDay}日(${tDayStr})`;
                 
+                // ▼ 天気のつなぎ言葉を小さくする正規表現（「所により」は漢字のまま） ▼
+                const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|所により|のち|時々|ときどき|一時|を伴う|から|まで)/g;
+
                 // 今日の天気
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
-                let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち').replace(/所により/g, 'ところにより');
-                const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
+                let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
+                
                 let htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
                 htmlWeather = htmlWeather.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
@@ -181,8 +184,10 @@
                 try {
                     let rawTomorrow = data[0].timeSeries[0].areas[0].weathers[1];
                     if (rawTomorrow) {
-                        let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち').replace(/所により/g, 'ところにより');
-                        document.getElementById('tomorrowWeatherText').innerText = cleanTomorrow;
+                        let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
+                        let htmlTomorrow = cleanTomorrow.replace(connectors, '<span class="connector">$1</span>');
+                        htmlTomorrow = htmlTomorrow.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
+                        document.getElementById('tomorrowWeatherText').innerHTML = htmlTomorrow;
                     }
                 } catch(e) {
                     document.getElementById('tomorrowWeatherText').innerText = "取得不可";
