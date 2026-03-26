@@ -279,7 +279,7 @@
                 // 【★我が家専用カスタマイズ③：カウントダウンを「受験本番」に】
                 try {
                     // ▼▼ ここを受験日に書き換えてください（YYYY-MM-DD形式） ▼▼
-                    const targetDate = new Date('2026-02-01T00:00:00+09:00'); // 例：2026年2月1日
+                    const targetDate = new Date('2027-02-01T00:00:00+09:00'); // 例：2026年2月1日
                     
                     const todayForCount = new Date();
                     
@@ -292,7 +292,7 @@
                     } else if (diffDays === 0) {
                         countdownEl.innerText = `いよいよ当日！全力を出し切れ！`;
                     } else {
-                        countdownEl.innerText = `受験本番お疲れ様でした！`;
+                        countdownEl.innerText = `受験お疲れ様でした！`;
                     }
                 } catch (e) {
                     document.getElementById('countdownText').innerText = "";
