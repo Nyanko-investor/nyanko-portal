@@ -51,8 +51,20 @@
             text-overflow: ellipsis; 
         }
 
+        /* ▼ 明日の天気用の新しいデザイン ▼ */
+        .tomorrow-box {
+            border: 2px dashed #000; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin: 10px 15px 0 15px; 
+            text-align: center; 
+        }
+        .tomorrow-title { font-size: 1.6rem; font-weight: bold; margin-bottom: 5px; }
+        .tomorrow-weather { font-size: 2.2rem; font-weight: bold; margin-bottom: 5px; line-height: 1.2; }
+        .tomorrow-temp { font-size: 1.9rem; font-weight: bold; }
+
         .extra-info-box {
-            margin: 0px 15px 25px 15px; 
+            margin: 15px 15px 25px 15px; 
             text-align: left;
             font-weight: bold;
             font-size: 1.7rem; 
@@ -102,10 +114,14 @@
             </div>
         </div>
 
+        <div class="tomorrow-box">
+            <div class="tomorrow-title">明日 (<span id="tomorrowDate">--/--</span>) の天気</div>
+            <div class="tomorrow-weather" id="tomorrowWeatherText">--</div>
+            <div class="tomorrow-temp"><span id="tomorrowMinTemp">--</span>℃ / <span id="tomorrowMaxTemp">--</span>℃</div>
+        </div>
+
         <div class="extra-info-box">
             <div id="trainText">・運行情報確認中...</div>
-            <div id="usdText">・USD/JPY: 取得中...</div>
-            <div id="nasdaqText">・NASDAQ: 取得中...</div>
             <div><a href="news.html" style="color: #000; text-decoration: none; border-bottom: 1px solid #000;">・今日のニュースを読む</a></div>
         </div>
     </div>
@@ -126,10 +142,7 @@
                 const uniqueTime = new Date().getTime();
                 
                 // 【★カスタマイズ箇所①：地域設定】デフォルトは東京です。
-                // 130000.json の部分をご自身の地域の気象庁コードに変更してください。
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json?_=" + uniqueTime;
-                
-                // latitude=... & longitude=... の部分をご自身の地域の緯度経度に変更してください。
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
                 const response = await fetch(jmaUrl);
@@ -137,7 +150,7 @@
 
                 // ▼ Kindleのタイムゾーン無視！絶対日本時間(JST)計算システム ▼
                 const now = new Date();
-                const jstNow = new Date(now.getTime() + 32400000); // 1970年からのミリ秒に9時間(32,400,000ms)を加算
+                const jstNow = new Date(now.getTime() + 32400000); 
                 
                 const year = jstNow.getUTCFullYear();
                 const month = jstNow.getUTCMonth() + 1;
@@ -148,16 +161,34 @@
                 const reiwa = year - 2018; 
                 
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
+
+                // ▼ 明日の日付計算 ▼
+                const tomorrow = new Date(jstNow.getTime() + 86400000); // 24時間足す
+                const tMonth = tomorrow.getUTCMonth() + 1;
+                const tDay = tomorrow.getUTCDate();
+                const tDayStr = ['日', '月', '火', '水', '木', '金', '土'][tomorrow.getUTCDay()];
+                document.getElementById('tomorrowDate').innerText = `${tMonth}月${tDay}日(${tDayStr})`;
                 
+                // 今日の天気
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち').replace(/所により/g, 'ところにより');
-                
                 const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
                 let htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
-                
                 htmlWeather = htmlWeather.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
+                // 明日の天気
+                try {
+                    let rawTomorrow = data[0].timeSeries[0].areas[0].weathers[1];
+                    if (rawTomorrow) {
+                        let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち').replace(/所により/g, 'ところにより');
+                        document.getElementById('tomorrowWeatherText').innerText = cleanTomorrow;
+                    }
+                } catch(e) {
+                    document.getElementById('tomorrowWeatherText').innerText = "取得不可";
+                }
+
+                // 傘・服装アドバイス
                 if (cleanWeather.startsWith('雨') || cleanWeather.startsWith('雪')) {
                     document.getElementById('umbrellaText').innerText = "傘を忘れないで持っていこう！";
                 } 
@@ -168,6 +199,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
+                // 気温と湿度（今日と明日）
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -176,12 +208,19 @@
                     const wind = meteoData.current.wind_speed_10m; 
                     document.getElementById('humidityText').innerText = `(湿度 ${humidity}% / 風速 ${wind}m/s)`;
 
+                    // 今日の気温
                     const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
                     const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
-                    
                     document.getElementById('minTemp').innerText = minT;
                     document.getElementById('maxTemp').innerText = maxT;
 
+                    // 明日の気温
+                    const minT_tmrw = Math.round(meteoData.daily.temperature_2m_min[1]);
+                    const maxT_tmrw = Math.round(meteoData.daily.temperature_2m_max[1]);
+                    document.getElementById('tomorrowMinTemp').innerText = minT_tmrw;
+                    document.getElementById('tomorrowMaxTemp').innerText = maxT_tmrw;
+
+                    // 服装判定
                     let clothesMsg = "";
                     if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
                     else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
@@ -194,8 +233,11 @@
                     document.getElementById('humidityText').innerText = "(湿度 --% / 風速 --m/s)";
                     document.getElementById('minTemp').innerText = "--";
                     document.getElementById('maxTemp').innerText = "--";
+                    document.getElementById('tomorrowMinTemp').innerText = "--";
+                    document.getElementById('tomorrowMaxTemp').innerText = "--";
                 }
 
+                // 運行情報
                 try {
                     const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
                     const trainRes = await fetch(trainUrl);
@@ -204,7 +246,7 @@
                     let isDelayed = false;
                     if (trainData.items) {
                         for (let item of trainData.items) {
-                            // 【★カスタマイズ箇所②：路線名】ご自身の使っている路線名（一部でOK）に変更してください
+                            // 【★カスタマイズ箇所②：路線名】
                             if (item.title.includes("山手線")) {
                                 isDelayed = true;
                                 break;
@@ -222,8 +264,9 @@
                     document.getElementById('trainText').innerText = "・運行情報が取得できません";
                 }
 
+                // カウントダウン
                 try {
-                    // 【★カスタマイズ箇所③：目標日】ご自身の大切な日（YYYY-MM-DD）に変更してください
+                    // 【★カスタマイズ箇所③：目標日】
                     const targetDate = new Date('2025-12-31T00:00:00+09:00');
                     const todayForCount = new Date();
                     
@@ -232,7 +275,6 @@
                     
                     const countdownEl = document.getElementById('countdownText');
                     if (diffDays > 0) {
-                        // ▼「目標日まで」の部分をお好きな言葉（例：家族旅行まで）に変更できます
                         countdownEl.innerText = `目標日まで あと${diffDays}日！`;
                     } else if (diffDays === 0) {
                         countdownEl.innerText = `いよいよ当日！全力を出し切れ！`;
@@ -243,47 +285,6 @@
                     document.getElementById('countdownText').innerText = "";
                 }
 
-                try {
-                    const fxUrl = "https://open.er-api.com/v6/latest/USD";
-                    const fxRes = await fetch(fxUrl);
-                    const fxData = await fxRes.json();
-                    
-                    const usdjpy = fxData.rates.JPY.toFixed(2);
-                    
-                    // ▼ 為替も絶対日本時間(JST)計算システムを適用 ▼
-                    const fxUtc = new Date(fxData.time_last_update_unix * 1000);
-                    const fxJst = new Date(fxUtc.getTime() + 32400000); 
-                    
-                    const fxMonth = fxJst.getUTCMonth() + 1;
-                    const fxDay = fxJst.getUTCDate();
-                    const fxHour = fxJst.getUTCHours().toString().padStart(2, '0');
-                    const fxMin = fxJst.getUTCMinutes().toString().padStart(2, '0');
-                    
-                    document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxMonth}月${fxDay}日 ${fxHour}:${fxMin} 時点)`;
-                    
-                    // 【★カスタマイズ箇所④：株価API】Finnhubで無料APIキーを取得し、以下に入力してください
-                    // ※株価情報が不要な方は、このブロックを無視するか、<div>タグごと削除しても構いません。
-                    const myKey = "ここに取得したAPIキーを入力";
-                    
-                    if (myKey && myKey !== "ここに取得したAPIキーを入力") {
-                        const stockUrl = "https://finnhub.io/api/v1/quote?symbol=QQQ&token=" + myKey;
-                        const stockRes = await fetch(stockUrl);
-                        const stockData = await stockRes.json();
-                        if (stockData && stockData.c) {
-                            const change = stockData.dp.toFixed(2);
-                            const sign = change >= 0 ? "+" : "";
-                            document.getElementById('nasdaqText').innerText = "・NASDAQ(QQQ): $" + stockData.c.toFixed(2) + " (" + sign + change + "%)";
-                        } else {
-                            document.getElementById('nasdaqText').innerText = "・NASDAQ(QQQ): 取得失敗";
-                        }
-                    } else {
-                        document.getElementById('nasdaqText').innerText = "・NASDAQ(QQQ): APIキー未設定";
-                    }
-                } catch (e) {
-                    document.getElementById('usdText').innerText = "・為替情報が取得できません";
-                    document.getElementById('nasdaqText').innerText = "・株価情報が取得できません";
-                }
-
                 updateTimeEl.innerText = `${h}:${m} 更新`;
 
             } catch (error) {
@@ -292,10 +293,10 @@
             }
         }
 
+        // 初回読み込み時の実行
         fetchWeather();
-        // 2時間ごとにバックグラウンド更新
-        setInterval(fetchWeather, 7200000);
 
+        // 6時間ごとにページ全体をリロードしてメモリをクリア（古いブラウザのフリーズ対策）
         setTimeout(() => {
             window.location.reload();
         }, 21600000); 
