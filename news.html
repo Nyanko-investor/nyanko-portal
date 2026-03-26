@@ -37,23 +37,11 @@
             font-weight: bold;
         }
 
-        .section-title {
-            font-size: 1.6rem;
-            font-weight: bold;
-            background-color: #000;
-            color: #fff;
-            padding: 3px 10px;
-            display: inline-block;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            margin-top: 5px;
-        }
         .news-list {
             list-style-type: none;
             padding: 0;
             margin: 0;
         }
-        /* ▼ さらに文字を小さく（1.5rem）、行間も詰める ▼ */
         .news-item {
             font-size: 1.5rem; 
             line-height: 1.25;
@@ -77,11 +65,10 @@
 <body>
 
     <div class="header">
-        <a href="kindle_tenki.html" class="back-link">← 天気に戻る</a>
-        <div class="page-title">朝のニュース</div>
+        <a href="index.html" class="back-link">← 天気に戻る</a>
+        <div class="page-title">今日のニュース</div>
     </div>
 
-    <div class="section-title">📰 主要ニュース</div>
     <ul class="news-list" id="generalContainer">
         <li class="news-item">ニュースを取得中...</li>
     </ul>
@@ -103,7 +90,15 @@
                     for (let i = 0; i < limit; i++) {
                         const item = data.items[i];
                         
-                        let cleanTitle = item.title.split(" - ")[0];
+                        // ▼ タイトルと配信元（- 〇〇新聞など）を綺麗に分割 ▼
+                        const splitIndex = item.title.lastIndexOf(" - ");
+                        let cleanTitle = item.title;
+                        let sourceName = "";
+                        
+                        if (splitIndex !== -1) {
+                            cleanTitle = item.title.substring(0, splitIndex);
+                            sourceName = item.title.substring(splitIndex + 3);
+                        }
                         
                         const pubDate = new Date(item.pubDate.replace(/-/g, '/'));
                         const h = pubDate.getHours().toString().padStart(2, '0');
@@ -113,7 +108,7 @@
                         li.className = 'news-item';
                         li.innerHTML = `
                             <div>・${cleanTitle}</div>
-                            <div class="news-date">(${h}:${m} 配信)</div>
+                            <div class="news-date">(${sourceName} ${h}:${m} 配信)</div>
                         `;
                         container.appendChild(li);
                     }
