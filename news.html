@@ -65,7 +65,7 @@
 <body>
 
     <div class="header">
-        <a href="index.html" class="back-link">← 天気に戻る</a>
+        <a href="kindle_tenki.html" class="back-link">← 天気に戻る</a>
         <div class="page-title">今日のニュース</div>
     </div>
 
@@ -90,7 +90,7 @@
                     for (let i = 0; i < limit; i++) {
                         const item = data.items[i];
                         
-                        // ▼ タイトルと配信元（- 〇〇新聞など）を綺麗に分割 ▼
+                        // タイトルと配信元（- 〇〇新聞など）を綺麗に分割
                         const splitIndex = item.title.lastIndexOf(" - ");
                         let cleanTitle = item.title;
                         let sourceName = "";
