@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="21600">
-    <title>Nyanko Portal Kindle (我が家専用)</title>
+    <title>Nyanko Portal Kindle</title>
     <style>
         body {
             background-color: #ffffff;
@@ -26,7 +26,7 @@
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* 天気テキストのベースを小さくし、天気ワードだけ大きくする */
+        /* ▼ 天気テキストのベースを小さくし、天気ワードだけ大きくする ▼ */
         .weather { font-size: 1.8rem; font-weight: normal; margin: 5px 0; line-height: 1.3; } 
         .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: baseline; }
         
@@ -52,7 +52,7 @@
             text-overflow: ellipsis; 
         }
 
-        /* 明日の天気用のデザイン */
+        /* ▼ 明日の天気用のデザイン ▼ */
         .tomorrow-box {
             border: 2px dashed #000; 
             border-radius: 8px; 
@@ -87,7 +87,7 @@
         <div class="header">
             <div class="date" id="dateText">----年(令和-年) -月-日(-)</div>
             <div class="time" id="updateTime">--:-- 更新</div>
-            <div class="header-countdown" id="countdownText">受験本番まで計算中...</div>
+            <div class="header-countdown" id="countdownText">目標日まで計算中...</div>
         </div>
     </div>
 
@@ -143,11 +143,9 @@
 
                 const uniqueTime = new Date().getTime();
                 
-                // 【★我が家専用カスタマイズ①：地域設定を「横浜」に】
-                // 気象庁コード: 140000.json
-                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
-                // 緯度経度: latitude=35.4437, longitude=139.6381
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4437&longitude=139.6381&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
+                // 【★カスタマイズ箇所①：地域設定】デフォルトは東京です。
+                const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json?_=" + uniqueTime;
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
@@ -250,7 +248,7 @@
                     document.getElementById('tomorrowMaxTemp').innerText = "--";
                 }
 
-                // 【★我が家専用カスタマイズ②：運行情報を「東海道線」に】
+                // 運行情報
                 try {
                     const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
                     const trainRes = await fetch(trainUrl);
@@ -259,7 +257,8 @@
                     let isDelayed = false;
                     if (trainData.items) {
                         for (let item of trainData.items) {
-                            if (item.title.includes("東海道線")) {
+                            // 【★カスタマイズ箇所②：路線名】
+                            if (item.title.includes("山手線")) {
                                 isDelayed = true;
                                 break;
                             }
@@ -268,19 +267,18 @@
                     
                     const trainEl = document.getElementById('trainText');
                     if (isDelayed) {
-                        trainEl.innerText = "・東海道線に遅れが出ています";
+                        trainEl.innerText = "・登録路線に遅れが出ています";
                     } else {
-                        trainEl.innerText = "・東海道線は平常運転です";
+                        trainEl.innerText = "・登録路線は平常運転です";
                     }
                 } catch (e) {
                     document.getElementById('trainText').innerText = "・運行情報が取得できません";
                 }
 
-                // 【★我が家専用カスタマイズ③：カウントダウンを「受験本番」に】
+                // カウントダウン
                 try {
-                    // ▼▼ ここを受験日に書き換えてください（YYYY-MM-DD形式） ▼▼
-                    const targetDate = new Date('2026-02-01T00:00:00+09:00'); // 例：2026年2月1日
-                    
+                    // 【★カスタマイズ箇所③：目標日】
+                    const targetDate = new Date('2025-12-31T00:00:00+09:00');
                     const todayForCount = new Date();
                     
                     const diffTime = targetDate - todayForCount;
@@ -288,11 +286,11 @@
                     
                     const countdownEl = document.getElementById('countdownText');
                     if (diffDays > 0) {
-                        countdownEl.innerText = `受験本番まで あと${diffDays}日！`;
+                        countdownEl.innerText = `目標日まで あと${diffDays}日！`;
                     } else if (diffDays === 0) {
                         countdownEl.innerText = `いよいよ当日！全力を出し切れ！`;
                     } else {
-                        countdownEl.innerText = `受験お疲れ様でした！`;
+                        countdownEl.innerText = `目標日を達成しました！`;
                     }
                 } catch (e) {
                     document.getElementById('countdownText').innerText = "";
