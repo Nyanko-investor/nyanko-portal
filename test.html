@@ -26,7 +26,7 @@
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* ▼ 天気テキストのベースを小さくし、天気ワードだけ大きくする ▼ */
+        /* 天気テキストのベースを小さくし、天気ワードだけ大きくする */
         .weather { font-size: 1.8rem; font-weight: normal; margin: 5px 0; line-height: 1.3; } 
         .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: baseline; }
         
@@ -52,7 +52,7 @@
             text-overflow: ellipsis; 
         }
 
-        /* ▼ 明日の天気用のデザイン ▼ */
+        /* 明日の天気用のデザイン */
         .tomorrow-box {
             border: 2px dashed #000; 
             border-radius: 8px; 
@@ -144,7 +144,9 @@
                 const uniqueTime = new Date().getTime();
                 
                 // 【★カスタマイズ箇所①：地域設定】デフォルトは東京です。
+                // 130000.json の部分をご自身の地域の気象庁コードに変更してください。
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json?_=" + uniqueTime;
+                // latitude=... & longitude=... の部分をご自身の地域の緯度経度に変更してください。
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
                 const response = await fetch(jmaUrl);
@@ -178,12 +180,16 @@
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
-                // 【改行ロジック：地域名のみ】
-                // 「〇〇 では」の直前（スペース）のみ改行する
+                // 【改行ロジック：地域名と「所により」】
+                // 1. 「〇〇 では」の直前（スペース）を改行する
                 let htmlWeather = cleanWeather.replace(/ ([^ <]+) では/g, '<br>$1 では');
+                // 2. 「所により」の直前を改行する
+                htmlWeather = htmlWeather.replace(/ ?所により/g, '<br>所により');
                 
                 // 天気ワードだけを巨大化
                 htmlWeather = htmlWeather.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
+                // 念のため、文頭に改行が来た場合は削除
+                htmlWeather = htmlWeather.replace(/^<br>/, '');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
 
@@ -194,8 +200,10 @@
                         let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                         
                         let htmlTomorrow = cleanTomorrow.replace(/ ([^ <]+) では/g, '<br>$1 では');
+                        htmlTomorrow = htmlTomorrow.replace(/ ?所により/g, '<br>所により');
                         
                         htmlTomorrow = htmlTomorrow.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
+                        htmlTomorrow = htmlTomorrow.replace(/^<br>/, '');
                         document.getElementById('tomorrowWeatherText').innerHTML = htmlTomorrow;
                     }
                 } catch(e) {
