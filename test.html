@@ -26,7 +26,7 @@
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* ▼ 天気テキストのベースを小さくし、天気ワードだけ大きくする ▼ */
+        /* 天気テキストのベースを小さくし、天気ワードだけ大きくする */
         .weather { font-size: 1.8rem; font-weight: normal; margin: 5px 0; line-height: 1.4; } 
         .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: middle; }
         
@@ -52,7 +52,7 @@
             text-overflow: ellipsis; 
         }
 
-        /* ▼ 明日の天気用のデザイン ▼ */
+        /* 明日の天気用のデザイン */
         .tomorrow-box {
             border: 2px dashed #000; 
             border-radius: 8px; 
@@ -171,24 +171,41 @@
                 const tDayStr = ['日', '月', '火', '水', '木', '金', '土'][tomorrow.getUTCDay()];
                 document.getElementById('tomorrowDate').innerText = `${tMonth}月${tDay}日(${tDayStr})`;
 
+                // ▼ 天気ワードを抽出して大きくする正規表現 ▼
+                const weatherWordRegex = /(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g;
+
+                // ▼ スマート改行ロジック用の正規表現（ここがポイント！） ▼
+                // 時間帯キーワード
+                const timeKeywords = /(明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|夜)/g;
+                // 地名（画像にある具体的な例）
+                const locationKeywords = /(多摩西部)/g;
+
+
                 // 今日の天気
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
-                // 所によりは漢字のまま、曇りをくもりに、後をのちに変更
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
-                // 改行を入れる
-                let htmlWeather = cleanWeather.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                // スマート改行：時間帯や地名の前で改行
+                let htmlWeather = cleanWeather.replace(timeKeywords, '<br>$1');
+                htmlWeather = htmlWeather.replace(locationKeywords, '<br>$1');
+                // 既存の改行（のち、時々）
+                htmlWeather = htmlWeather.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                
                 // 天気ワードだけを抽出して大きくする
-                htmlWeather = htmlWeather.replace(/(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g, '<span class="weather-word">$1</span>');
+                htmlWeather = htmlWeather.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
-                // 明日の天気
+
+                // 明日の天気（今日と同じロジックを適用）
                 try {
                     let rawTomorrow = data[0].timeSeries[0].areas[0].weathers[1];
                     if (rawTomorrow) {
                         let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
-                        let htmlTomorrow = cleanTomorrow.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
-                        htmlTomorrow = htmlTomorrow.replace(/(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g, '<span class="weather-word">$1</span>');
+                        
+                        let htmlTomorrow = cleanTomorrow.replace(timeKeywords, '<br>$1');
+                        htmlTomorrow = htmlTomorrow.replace(locationKeywords, '<br>$1');
+                        htmlTomorrow = htmlTomorrow.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                        htmlTomorrow = htmlTomorrow.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
                         document.getElementById('tomorrowWeatherText').innerHTML = htmlTomorrow;
                     }
                 } catch(e) {
@@ -253,7 +270,7 @@
                     let isDelayed = false;
                     if (trainData.items) {
                         for (let item of trainData.items) {
-                            // 【★カスタカスタマイズ箇所②：路線名】
+                            // 【★カスタマイズ箇所②：路線名】
                             if (item.title.includes("山手線")) {
                                 isDelayed = true;
                                 break;
