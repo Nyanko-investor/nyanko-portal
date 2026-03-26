@@ -26,9 +26,9 @@
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* 天気テキストのベースを小さくし、天気ワードだけ大きくする */
-        .weather { font-size: 1.8rem; font-weight: normal; margin: 5px 0; line-height: 1.4; } 
-        .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: middle; }
+        /* ▼ 行間を詰め、文字の縦位置を綺麗に揃える ▼ */
+        .weather { font-size: 1.8rem; font-weight: normal; margin: 5px 0; line-height: 1.2; } 
+        .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: bottom; }
         
         .temp-container { margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .temp { font-size: 3.0rem; font-weight: bold; }
@@ -52,7 +52,7 @@
             text-overflow: ellipsis; 
         }
 
-        /* 明日の天気用のデザイン */
+        /* ▼ 明日の天気用のデザインも行間を詰める ▼ */
         .tomorrow-box {
             border: 2px dashed #000; 
             border-radius: 8px; 
@@ -61,8 +61,8 @@
             text-align: center; 
         }
         .tomorrow-title { font-size: 1.6rem; font-weight: bold; margin-bottom: 5px; }
-        .tomorrow-weather { font-size: 1.4rem; font-weight: normal; margin-bottom: 5px; line-height: 1.4; }
-        .tomorrow-box .weather-word { font-size: 2.2rem; font-weight: bold; margin: 0 2px; vertical-align: middle; }
+        .tomorrow-weather { font-size: 1.4rem; font-weight: normal; margin-bottom: 5px; line-height: 1.2; }
+        .tomorrow-box .weather-word { font-size: 2.2rem; font-weight: bold; margin: 0 2px; vertical-align: bottom; }
         .tomorrow-temp { font-size: 1.9rem; font-weight: bold; }
 
         .extra-info-box {
@@ -129,7 +129,6 @@
     </div>
 
     <script>
-        // カバーを開けた瞬間に更新させるためのイベントリスナー（物理ハック用）
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 fetchWeather();
@@ -150,7 +149,6 @@
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
-                // ▼ Kindleのタイムゾーン無視！絶対日本時間(JST)計算システム ▼
                 const now = new Date();
                 const jstNow = new Date(now.getTime() + 32400000); 
                 
@@ -164,8 +162,7 @@
                 
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
 
-                // ▼ 明日の日付計算 ▼
-                const tomorrow = new Date(jstNow.getTime() + 86400000); // 24時間足す
+                const tomorrow = new Date(jstNow.getTime() + 86400000); 
                 const tMonth = tomorrow.getUTCMonth() + 1;
                 const tDay = tomorrow.getUTCDate();
                 const tDayStr = ['日', '月', '火', '水', '木', '金', '土'][tomorrow.getUTCDay()];
@@ -174,38 +171,31 @@
                 // ▼ 天気ワードを抽出して大きくする正規表現 ▼
                 const weatherWordRegex = /(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g;
 
-                // ▼ スマート改行ロジック用の正規表現（ここがポイント！） ▼
-                // 時間帯キーワード
-                const timeKeywords = /(明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|夜)/g;
-                // 地名（画像にある具体的な例）
-                const locationKeywords = /(多摩西部)/g;
-
-
-                // 今日の天気
+                // --- 今日の天気 ---
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
-                // スマート改行：時間帯や地名の前で改行
-                let htmlWeather = cleanWeather.replace(timeKeywords, '<br>$1');
-                htmlWeather = htmlWeather.replace(locationKeywords, '<br>$1');
-                // 既存の改行（のち、時々）
-                htmlWeather = htmlWeather.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                // 【改行ロジック】
+                // 1. メインの天気の切り替わり（のち、時々など）の前で改行
+                let htmlWeather = cleanWeather.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                // 2. 地域限定ワード（〇〇 では）の直前で改行（例：「 多摩西部 では」 -> 「<br>多摩西部 では」）
+                htmlWeather = htmlWeather.replace(/(^| )([^ ]+) では/g, '<br>$2 では');
                 
-                // 天気ワードだけを抽出して大きくする
+                // 天気ワードを巨大化
                 htmlWeather = htmlWeather.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
 
-                // 明日の天気（今日と同じロジックを適用）
+                // --- 明日の天気 ---
                 try {
                     let rawTomorrow = data[0].timeSeries[0].areas[0].weathers[1];
                     if (rawTomorrow) {
                         let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                         
-                        let htmlTomorrow = cleanTomorrow.replace(timeKeywords, '<br>$1');
-                        htmlTomorrow = htmlTomorrow.replace(locationKeywords, '<br>$1');
-                        htmlTomorrow = htmlTomorrow.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                        let htmlTomorrow = cleanTomorrow.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                        htmlTomorrow = htmlTomorrow.replace(/(^| )([^ ]+) では/g, '<br>$2 では');
                         htmlTomorrow = htmlTomorrow.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
+                        
                         document.getElementById('tomorrowWeatherText').innerHTML = htmlTomorrow;
                     }
                 } catch(e) {
@@ -223,7 +213,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 気温と湿度（今日と明日）
+                // 気温と湿度
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -232,19 +222,16 @@
                     const wind = meteoData.current.wind_speed_10m; 
                     document.getElementById('humidityText').innerText = `(湿度 ${humidity}% / 風速 ${wind}m/s)`;
 
-                    // 今日の気温
                     const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
                     const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
                     document.getElementById('minTemp').innerText = minT;
                     document.getElementById('maxTemp').innerText = maxT;
 
-                    // 明日の気温
                     const minT_tmrw = Math.round(meteoData.daily.temperature_2m_min[1]);
                     const maxT_tmrw = Math.round(meteoData.daily.temperature_2m_max[1]);
                     document.getElementById('tomorrowMinTemp').innerText = minT_tmrw;
                     document.getElementById('tomorrowMaxTemp').innerText = maxT_tmrw;
 
-                    // 服装判定
                     let clothesMsg = "";
                     if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
                     else if (maxT >= 20) { clothesMsg = "長そでのシャツがピッタリ！"; } 
@@ -317,10 +304,8 @@
             }
         }
 
-        // 初回読み込み時の実行
         fetchWeather();
 
-        // 6時間ごとにページ全体をリロードしてメモリをクリア（古いブラウザのフリーズ対策）
         setTimeout(() => {
             window.location.reload();
         }, 21600000); 
