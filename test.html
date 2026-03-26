@@ -26,8 +26,9 @@
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .weather { font-size: 3.5rem; font-weight: bold; margin: 5px 0; line-height: 1.2; } 
-        .connector { font-size: 1.8rem; font-weight: normal; margin: 0 4px; vertical-align: middle; }
+        /* ▼ 天気テキストのベースを小さくし、天気ワードだけ大きくする ▼ */
+        .weather { font-size: 1.8rem; font-weight: normal; margin: 5px 0; line-height: 1.4; } 
+        .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: middle; }
         
         .temp-container { margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .temp { font-size: 3.0rem; font-weight: bold; }
@@ -51,7 +52,7 @@
             text-overflow: ellipsis; 
         }
 
-        /* ▼ 明日の天気用の新しいデザイン ▼ */
+        /* ▼ 明日の天気用のデザイン ▼ */
         .tomorrow-box {
             border: 2px dashed #000; 
             border-radius: 8px; 
@@ -60,7 +61,8 @@
             text-align: center; 
         }
         .tomorrow-title { font-size: 1.6rem; font-weight: bold; margin-bottom: 5px; }
-        .tomorrow-weather { font-size: 2.2rem; font-weight: bold; margin-bottom: 5px; line-height: 1.2; }
+        .tomorrow-weather { font-size: 1.4rem; font-weight: normal; margin-bottom: 5px; line-height: 1.4; }
+        .tomorrow-box .weather-word { font-size: 2.2rem; font-weight: bold; margin: 0 2px; vertical-align: middle; }
         .tomorrow-temp { font-size: 1.9rem; font-weight: bold; }
 
         .extra-info-box {
@@ -168,16 +170,16 @@
                 const tDay = tomorrow.getUTCDate();
                 const tDayStr = ['日', '月', '火', '水', '木', '金', '土'][tomorrow.getUTCDay()];
                 document.getElementById('tomorrowDate').innerText = `${tMonth}月${tDay}日(${tDayStr})`;
-                
-                // ▼ 天気のつなぎ言葉を小さくする正規表現（「所により」は漢字のまま） ▼
-                const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|所により|のち|時々|ときどき|一時|を伴う|から|まで)/g;
 
                 // 今日の天気
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
+                // 所によりは漢字のまま、曇りをくもりに、後をのちに変更
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
-                let htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
-                htmlWeather = htmlWeather.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
+                // 改行を入れる
+                let htmlWeather = cleanWeather.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                // 天気ワードだけを抽出して大きくする
+                htmlWeather = htmlWeather.replace(/(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g, '<span class="weather-word">$1</span>');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
                 // 明日の天気
@@ -185,8 +187,8 @@
                     let rawTomorrow = data[0].timeSeries[0].areas[0].weathers[1];
                     if (rawTomorrow) {
                         let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
-                        let htmlTomorrow = cleanTomorrow.replace(connectors, '<span class="connector">$1</span>');
-                        htmlTomorrow = htmlTomorrow.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
+                        let htmlTomorrow = cleanTomorrow.replace(/(のち|時々|ときどき|一時)/g, '<br>$1');
+                        htmlTomorrow = htmlTomorrow.replace(/(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g, '<span class="weather-word">$1</span>');
                         document.getElementById('tomorrowWeatherText').innerHTML = htmlTomorrow;
                     }
                 } catch(e) {
@@ -251,7 +253,7 @@
                     let isDelayed = false;
                     if (trainData.items) {
                         for (let item of trainData.items) {
-                            // 【★カスタマイズ箇所②：路線名】
+                            // 【★カスタカスタマイズ箇所②：路線名】
                             if (item.title.includes("山手線")) {
                                 isDelayed = true;
                                 break;
