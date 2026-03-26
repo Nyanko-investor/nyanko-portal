@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="21600">
-    <title>Nyanko Portal Kindle</title>
+    <title>Nyanko Portal Kindle (我が家専用)</title>
     <style>
         body {
             background-color: #ffffff;
@@ -26,8 +26,9 @@
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .weather { font-size: 3.5rem; font-weight: bold; margin: 5px 0; line-height: 1.2; } 
-        .connector { font-size: 1.8rem; font-weight: normal; margin: 0 4px; vertical-align: middle; }
+        /* 天気テキストのベースを小さくし、天気ワードだけ大きくする */
+        .weather { font-size: 1.8rem; font-weight: normal; margin: 5px 0; line-height: 1.3; } 
+        .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: baseline; }
         
         .temp-container { margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
         .temp { font-size: 3.0rem; font-weight: bold; }
@@ -51,8 +52,21 @@
             text-overflow: ellipsis; 
         }
 
+        /* 明日の天気用のデザイン */
+        .tomorrow-box {
+            border: 2px dashed #000; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin: 10px 15px 0 15px; 
+            text-align: center; 
+        }
+        .tomorrow-title { font-size: 1.6rem; font-weight: bold; margin-bottom: 5px; }
+        .tomorrow-weather { font-size: 1.4rem; font-weight: normal; margin-bottom: 5px; line-height: 1.3; }
+        .tomorrow-box .weather-word { font-size: 2.2rem; font-weight: bold; margin: 0 2px; vertical-align: baseline; }
+        .tomorrow-temp { font-size: 1.9rem; font-weight: bold; }
+
         .extra-info-box {
-            margin: 0px 15px 25px 15px; 
+            margin: 15px 15px 25px 15px; 
             text-align: left;
             font-weight: bold;
             font-size: 1.7rem; 
@@ -102,30 +116,45 @@
             </div>
         </div>
 
+        <div class="tomorrow-box">
+            <div class="tomorrow-title">明日 (<span id="tomorrowDate">--/--</span>) の天気</div>
+            <div class="tomorrow-weather" id="tomorrowWeatherText">--</div>
+            <div class="tomorrow-temp"><span id="tomorrowMinTemp">--</span>℃ / <span id="tomorrowMaxTemp">--</span>℃</div>
+        </div>
+
         <div class="extra-info-box">
             <div id="trainText">・運行情報確認中...</div>
-            <div id="usdText">・USD/JPY: 取得中...</div>
-            <div id="nasdaqText">・NASDAQ: 取得中...</div>
             <div><a href="news.html" style="color: #000; text-decoration: none; border-bottom: 1px solid #000;">・今日のニュースを読む</a></div>
         </div>
     </div>
 
     <script>
+        // カバーを開けた瞬間に更新させるためのイベントリスナー（物理ハック用）
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                fetchWeather();
+            }
+        });
+
         async function fetchWeather() {
             try {
                 const updateTimeEl = document.getElementById('updateTime');
                 updateTimeEl.innerText = "更新中...";
 
                 const uniqueTime = new Date().getTime();
+                
+                // 【★我が家専用カスタマイズ①：地域設定を「横浜」に】
+                // 気象庁コード: 140000.json
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4478&longitude=139.6425&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
+                // 緯度経度: latitude=35.4437, longitude=139.6381
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4437&longitude=139.6381&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
                 // ▼ Kindleのタイムゾーン無視！絶対日本時間(JST)計算システム ▼
                 const now = new Date();
-                const jstNow = new Date(now.getTime() + 32400000); // 1970年からのミリ秒に9時間(32,400,000ms)を加算
+                const jstNow = new Date(now.getTime() + 32400000); 
                 
                 const year = jstNow.getUTCFullYear();
                 const month = jstNow.getUTCMonth() + 1;
@@ -136,16 +165,46 @@
                 const reiwa = year - 2018; 
                 
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
-                
+
+                // ▼ 明日の日付計算 ▼
+                const tomorrow = new Date(jstNow.getTime() + 86400000); 
+                const tMonth = tomorrow.getUTCMonth() + 1;
+                const tDay = tomorrow.getUTCDate();
+                const tDayStr = ['日', '月', '火', '水', '木', '金', '土'][tomorrow.getUTCDay()];
+                document.getElementById('tomorrowDate').innerText = `${tMonth}月${tDay}日(${tDayStr})`;
+
+                // ▼ 天気ワードを抽出して大きくする正規表現 ▼
+                const weatherWordRegex = /(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g;
+
+                // --- 今日の天気 ---
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
-                let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち').replace(/所により/g, 'ところにより');
+                let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
-                const connectors = /(未明|明け方|朝|昼前|昼過ぎ|夕方|夜のはじめ頃|夜遅く|ところにより|のち|時々|ときどき|一時|を伴う|から|まで)/g;
-                let htmlWeather = cleanWeather.replace(connectors, '<span class="connector">$1</span>');
+                // 【改行ロジック：地域名のみ】
+                // 「〇〇 では」の直前（スペース）のみ改行する
+                let htmlWeather = cleanWeather.replace(/ ([^ <]+) では/g, '<br>$1 では');
                 
-                htmlWeather = htmlWeather.replace(/(<span class="connector">(のち|時々|ときどき|一時)<\/span>)/g, '<br>$1');
+                // 天気ワードだけを巨大化
+                htmlWeather = htmlWeather.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
+
+                // --- 明日の天気（今日と同じ改行ロジックを適用） ---
+                try {
+                    let rawTomorrow = data[0].timeSeries[0].areas[0].weathers[1];
+                    if (rawTomorrow) {
+                        let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
+                        
+                        let htmlTomorrow = cleanTomorrow.replace(/ ([^ <]+) では/g, '<br>$1 では');
+                        
+                        htmlTomorrow = htmlTomorrow.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
+                        document.getElementById('tomorrowWeatherText').innerHTML = htmlTomorrow;
+                    }
+                } catch(e) {
+                    document.getElementById('tomorrowWeatherText').innerText = "取得不可";
+                }
+
+                // 傘・服装アドバイス
                 if (cleanWeather.startsWith('雨') || cleanWeather.startsWith('雪')) {
                     document.getElementById('umbrellaText').innerText = "傘を忘れないで持っていこう！";
                 } 
@@ -156,6 +215,7 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
+                // 気温と湿度
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
@@ -166,9 +226,13 @@
 
                     const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
                     const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
-                    
                     document.getElementById('minTemp').innerText = minT;
                     document.getElementById('maxTemp').innerText = maxT;
+
+                    const minT_tmrw = Math.round(meteoData.daily.temperature_2m_min[1]);
+                    const maxT_tmrw = Math.round(meteoData.daily.temperature_2m_max[1]);
+                    document.getElementById('tomorrowMinTemp').innerText = minT_tmrw;
+                    document.getElementById('tomorrowMaxTemp').innerText = maxT_tmrw;
 
                     let clothesMsg = "";
                     if (maxT >= 25) { clothesMsg = "半そでがいいね！"; } 
@@ -182,8 +246,11 @@
                     document.getElementById('humidityText').innerText = "(湿度 --% / 風速 --m/s)";
                     document.getElementById('minTemp').innerText = "--";
                     document.getElementById('maxTemp').innerText = "--";
+                    document.getElementById('tomorrowMinTemp').innerText = "--";
+                    document.getElementById('tomorrowMaxTemp').innerText = "--";
                 }
 
+                // 【★我が家専用カスタマイズ②：運行情報を「東海道線」に】
                 try {
                     const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
                     const trainRes = await fetch(trainUrl);
@@ -192,7 +259,7 @@
                     let isDelayed = false;
                     if (trainData.items) {
                         for (let item of trainData.items) {
-                            if (item.title.includes("東海道")) {
+                            if (item.title.includes("東海道線")) {
                                 isDelayed = true;
                                 break;
                             }
@@ -209,8 +276,11 @@
                     document.getElementById('trainText').innerText = "・運行情報が取得できません";
                 }
 
+                // 【★我が家専用カスタマイズ③：カウントダウンを「受験本番」に】
                 try {
-                    const targetDate = new Date('2027-02-01T00:00:00+09:00');
+                    // ▼▼ ここを受験日に書き換えてください（YYYY-MM-DD形式） ▼▼
+                    const targetDate = new Date('2026-02-01T00:00:00+09:00'); // 例：2026年2月1日
+                    
                     const todayForCount = new Date();
                     
                     const diffTime = targetDate - todayForCount;
@@ -220,35 +290,12 @@
                     if (diffDays > 0) {
                         countdownEl.innerText = `受験本番まで あと${diffDays}日！`;
                     } else if (diffDays === 0) {
-                        countdownEl.innerText = `いよいよ本番！全力を出し切れ！`;
+                        countdownEl.innerText = `いよいよ当日！全力を出し切れ！`;
                     } else {
-                        countdownEl.innerText = `受験お疲れ様でした！`;
+                        countdownEl.innerText = `受験本番お疲れ様でした！`;
                     }
                 } catch (e) {
                     document.getElementById('countdownText').innerText = "";
-                }
-
-                try {
-                    const fxUrl = "https://open.er-api.com/v6/latest/USD";
-                    const fxRes = await fetch(fxUrl);
-                    const fxData = await fxRes.json();
-                    
-                    const usdjpy = fxData.rates.JPY.toFixed(2);
-                    
-                    // ▼ 為替も絶対日本時間(JST)計算システムを適用 ▼
-                    const fxUtc = new Date(fxData.time_last_update_unix * 1000);
-                    const fxJst = new Date(fxUtc.getTime() + 32400000); 
-                    
-                    const fxMonth = fxJst.getUTCMonth() + 1;
-                    const fxDay = fxJst.getUTCDate();
-                    const fxHour = fxJst.getUTCHours().toString().padStart(2, '0');
-                    const fxMin = fxJst.getUTCMinutes().toString().padStart(2, '0');
-                    
-                    document.getElementById('usdText').innerText = `・USD/JPY: ${usdjpy}円 (${fxMonth}月${fxDay}日 ${fxHour}:${fxMin} 時点)`;
-                    document.getElementById('nasdaqText').innerText = `・NASDAQ: --- (要API)`;
-                } catch (e) {
-                    document.getElementById('usdText').innerText = "・為替情報が取得できません";
-                    document.getElementById('nasdaqText').innerText = "";
                 }
 
                 updateTimeEl.innerText = `${h}:${m} 更新`;
@@ -259,9 +306,10 @@
             }
         }
 
+        // 初回読み込み時の実行
         fetchWeather();
-        setInterval(fetchWeather, 7200000);
 
+        // 6時間ごとにページ全体をリロードしてメモリをクリア（古いブラウザのフリーズ対策）
         setTimeout(() => {
             window.location.reload();
         }, 21600000); 
