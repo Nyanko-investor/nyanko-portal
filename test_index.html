@@ -19,25 +19,25 @@
         }
 
         .header-container { margin-top: 10px; padding: 0 10px; }
-        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 15px; }
+        .header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 10px; }
         .date { font-size: 2.5rem; font-weight: bold; margin-bottom: 2px; } 
-        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; margin-top: 8px; margin-bottom: 10px;}
+        .time { font-size: 1.4rem; font-weight: bold; white-space: nowrap; margin-top: 6px; margin-bottom: 6px;}
         .header-countdown { font-size: 2.0rem; font-weight: bold; margin-top: 2px; }
         
         .main-content { padding: 0 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* ▼ 天気テキストのベースを小さくし、天気ワードだけ大きくする ▼ */
-        .weather { font-size: 1.8rem; font-weight: normal; margin: 5px 0; line-height: 1.3; } 
+        .weather { font-size: 1.8rem; font-weight: normal; margin: 4px 0; line-height: 1.3; } 
         .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: baseline; }
         
-        .temp-container { margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
-        .temp { font-size: 3.0rem; font-weight: bold; }
-        .humidity { font-size: 2.0rem; font-weight: normal; margin-top: 5px; }
+        /* 今日の気温と湿度を1行にまとめるCSS */
+        .temp-container { margin-bottom: 8px; text-align: center; line-height: 1.2; white-space: nowrap; }
+        .temp { font-size: 2.7rem; font-weight: bold; display: inline-block; }
+        .humidity { font-size: 1.6rem; font-weight: normal; display: inline-block; margin-left: 8px; }
         
-        .advice-box { border: 3px solid #000; border-radius: 10px; padding: 6px; margin: 0 15px; text-align: left; font-weight: bold; }
+        .advice-box { border: 3px solid #000; border-radius: 10px; padding: 5px; margin: 0 15px; text-align: left; font-weight: bold; }
         .advice-item {
             font-size: 1.9rem; 
-            margin: 6px 0; 
+            margin: 4px 0; 
             display: flex;
             align-items: center;
             padding: 0 5px;
@@ -52,21 +52,19 @@
             text-overflow: ellipsis; 
         }
 
-        /* ▼ 明日の天気用のデザイン ▼ */
         .tomorrow-box {
             border: 2px dashed #000; 
             border-radius: 8px; 
-            padding: 8px; 
-            margin: 10px 15px 0 15px; 
+            padding: 6px; 
+            margin: 8px 15px 0 15px; 
             text-align: center; 
         }
-        .tomorrow-title { font-size: 1.6rem; font-weight: bold; margin-bottom: 5px; }
-        .tomorrow-weather { font-size: 1.4rem; font-weight: normal; margin-bottom: 5px; line-height: 1.3; }
+        .tomorrow-weather { font-size: 1.4rem; font-weight: normal; margin-bottom: 4px; line-height: 1.3; }
         .tomorrow-box .weather-word { font-size: 2.2rem; font-weight: bold; margin: 0 2px; vertical-align: baseline; }
         .tomorrow-temp { font-size: 1.9rem; font-weight: bold; }
 
         .extra-info-box {
-            margin: 15px 15px 25px 15px; 
+            margin: 10px 15px 15px 15px; 
             text-align: left;
             font-weight: bold;
             font-size: 1.7rem; 
@@ -74,7 +72,7 @@
             flex-direction: column;
         }
         .extra-info-box div {
-            margin-bottom: 12px; 
+            margin-bottom: 10px; 
         }
         .extra-info-box div:last-child {
             margin-bottom: 0;
@@ -96,12 +94,8 @@
             <div class="weather" id="weatherText"></div>
             
             <div class="temp-container">
-                <div class="temp">
-                    <span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃
-                </div>
-                <div class="humidity" id="humidityText">
-                    (湿度 --% / 風速 --m/s)
-                </div>
+                <span class="temp"><span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃</span>
+                <span class="humidity" id="humidityText">(湿度 --% / 風速 --m/s)</span>
             </div>
         </div>
 
@@ -117,8 +111,7 @@
         </div>
 
         <div class="tomorrow-box">
-            <div class="tomorrow-title">明日 (<span id="tomorrowDate">--/--</span>) の天気</div>
-            <div class="tomorrow-weather" id="tomorrowWeatherText">--</div>
+            <div class="tomorrow-weather" id="tomorrowWeatherText">明日は --</div>
             <div class="tomorrow-temp"><span id="tomorrowMinTemp">--</span>℃ / <span id="tomorrowMaxTemp">--</span>℃</div>
         </div>
 
@@ -129,7 +122,6 @@
     </div>
 
     <script>
-        // カバーを開けた瞬間に更新させるためのイベントリスナー（物理ハック用）
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 fetchWeather();
@@ -143,14 +135,13 @@
 
                 const uniqueTime = new Date().getTime();
                 
-                // 【★カスタマイズ箇所①：地域設定】デフォルトは東京です。
+                // 【★デフォルト：東京】
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json?_=" + uniqueTime;
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
 
-                // ▼ Kindleのタイムゾーン無視！絶対日本時間(JST)計算システム ▼
                 const now = new Date();
                 const jstNow = new Date(now.getTime() + 32400000); 
                 
@@ -164,49 +155,43 @@
                 
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
 
-                // ▼ 明日の日付計算 ▼
-                const tomorrow = new Date(jstNow.getTime() + 86400000); 
-                const tMonth = tomorrow.getUTCMonth() + 1;
-                const tDay = tomorrow.getUTCDate();
-                const tDayStr = ['日', '月', '火', '水', '木', '金', '土'][tomorrow.getUTCDay()];
-                document.getElementById('tomorrowDate').innerText = `${tMonth}月${tDay}日(${tDayStr})`;
-
-                // ▼ 天気ワードを抽出して大きくする正規表現 ▼
-                const weatherWordRegex = /(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g;
+                const weatherWordRegex = /(雷雨|晴れ|晴|くもり|雨|雪|雷|みぞれ)/g;
 
                 // --- 今日の天気 ---
                 let rawWeather = data[0].timeSeries[0].areas[0].weathers[0];
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
-                // 【改行ロジック：地域名のみ】
-                // 「〇〇 では」の直前（スペース）のみ改行する
                 let htmlWeather = cleanWeather.replace(/ ([^ <]+) では/g, '<br>$1 では');
+                htmlWeather = htmlWeather.replace(/ ?所により/g, '<br>所により');
                 
-                // 天気ワードだけを巨大化
                 htmlWeather = htmlWeather.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
+                htmlWeather = htmlWeather.replace(/^<br>/, '');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
 
-                // --- 明日の天気（今日と同じ改行ロジックを適用） ---
+                // --- 明日の天気 ---
                 try {
                     let rawTomorrow = data[0].timeSeries[0].areas[0].weathers[1];
                     if (rawTomorrow) {
                         let cleanTomorrow = rawTomorrow.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                         
                         let htmlTomorrow = cleanTomorrow.replace(/ ([^ <]+) では/g, '<br>$1 では');
+                        htmlTomorrow = htmlTomorrow.replace(/ ?所により/g, '<br>所により');
                         
                         htmlTomorrow = htmlTomorrow.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
-                        document.getElementById('tomorrowWeatherText').innerHTML = htmlTomorrow;
+                        htmlTomorrow = htmlTomorrow.replace(/^<br>/, '');
+                        
+                        document.getElementById('tomorrowWeatherText').innerHTML = "明日は " + htmlTomorrow;
                     }
                 } catch(e) {
-                    document.getElementById('tomorrowWeatherText').innerText = "取得不可";
+                    document.getElementById('tomorrowWeatherText').innerText = "明日は 取得不可";
                 }
 
                 // 傘・服装アドバイス
-                if (cleanWeather.startsWith('雨') || cleanWeather.startsWith('雪')) {
+                if (cleanWeather.startsWith('雨') || cleanWeather.startsWith('雪') || cleanWeather.startsWith('雷雨')) {
                     document.getElementById('umbrellaText').innerText = "傘を忘れないで持っていこう！";
                 } 
-                else if (cleanWeather.includes('雨') || cleanWeather.includes('雪')) {
+                else if (cleanWeather.includes('雨') || cleanWeather.includes('雪') || cleanWeather.includes('雷雨')) {
                     document.getElementById('umbrellaText').innerText = "折りたたみ傘があると安心！";
                 } 
                 else {
@@ -257,7 +242,7 @@
                     let isDelayed = false;
                     if (trainData.items) {
                         for (let item of trainData.items) {
-                            // 【★カスタマイズ箇所②：路線名】
+                            // 【★デフォルト：山手線】
                             if (item.title.includes("山手線")) {
                                 isDelayed = true;
                                 break;
@@ -277,7 +262,6 @@
 
                 // カウントダウン
                 try {
-                    // 【★カスタマイズ箇所③：目標日】
                     const targetDate = new Date('2025-12-31T00:00:00+09:00');
                     const todayForCount = new Date();
                     
@@ -304,10 +288,8 @@
             }
         }
 
-        // 初回読み込み時の実行
         fetchWeather();
 
-        // 6時間ごとにページ全体をリロードしてメモリをクリア（古いブラウザのフリーズ対策）
         setTimeout(() => {
             window.location.reload();
         }, 21600000); 
