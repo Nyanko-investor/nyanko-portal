@@ -60,7 +60,7 @@
             margin: 10px 15px 0 15px; 
             text-align: center; 
         }
-        .tomorrow-title { font-size: 1.6rem; font-weight: bold; margin-bottom: 5px; }
+        /* title行のCSSを削除し、天気部分のみに */
         .tomorrow-weather { font-size: 1.4rem; font-weight: normal; margin-bottom: 5px; line-height: 1.3; }
         .tomorrow-box .weather-word { font-size: 2.2rem; font-weight: bold; margin: 0 2px; vertical-align: baseline; }
         .tomorrow-temp { font-size: 1.9rem; font-weight: bold; }
@@ -117,8 +117,7 @@
         </div>
 
         <div class="tomorrow-box">
-            <div class="tomorrow-title">明日 (<span id="tomorrowDate">--/--</span>) の天気</div>
-            <div class="tomorrow-weather" id="tomorrowWeatherText">--</div>
+            <div class="tomorrow-weather" id="tomorrowWeatherText">明日の天気は --</div>
             <div class="tomorrow-temp"><span id="tomorrowMinTemp">--</span>℃ / <span id="tomorrowMaxTemp">--</span>℃</div>
         </div>
 
@@ -166,12 +165,7 @@
                 
                 document.getElementById('dateText').innerText = `${year}年(令和${reiwa}年) ${month}月${day}日(${dayStr})`;
 
-                // ▼ 明日の日付計算 ▼
-                const tomorrow = new Date(jstNow.getTime() + 86400000); 
-                const tMonth = tomorrow.getUTCMonth() + 1;
-                const tDay = tomorrow.getUTCDate();
-                const tDayStr = ['日', '月', '火', '水', '木', '金', '土'][tomorrow.getUTCDay()];
-                document.getElementById('tomorrowDate').innerText = `${tMonth}月${tDay}日(${tDayStr})`;
+                // (※明日の日付計算コードは、画面から消したため削除しました)
 
                 // ▼ 天気ワードを抽出して大きくする正規表現 ▼
                 const weatherWordRegex = /(晴れ|晴|くもり|雨|雪|雷|みぞれ)/g;
@@ -181,19 +175,16 @@
                 let cleanWeather = rawWeather.replace(/　/g, ' ').replace(/曇り/g, 'くもり').replace(/後/g, 'のち');
                 
                 // 【改行ロジック：地域名と「所により」】
-                // 1. 「〇〇 では」の直前（スペース）を改行する
                 let htmlWeather = cleanWeather.replace(/ ([^ <]+) では/g, '<br>$1 では');
-                // 2. 「所により」の直前を改行する
                 htmlWeather = htmlWeather.replace(/ ?所により/g, '<br>所により');
                 
                 // 天気ワードだけを巨大化
                 htmlWeather = htmlWeather.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
-                // 念のため、文頭に改行が来た場合は削除
                 htmlWeather = htmlWeather.replace(/^<br>/, '');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
 
 
-                // --- 明日の天気（今日と同じ改行ロジックを適用） ---
+                // --- 明日の天気 ---
                 try {
                     let rawTomorrow = data[0].timeSeries[0].areas[0].weathers[1];
                     if (rawTomorrow) {
@@ -204,10 +195,12 @@
                         
                         htmlTomorrow = htmlTomorrow.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
                         htmlTomorrow = htmlTomorrow.replace(/^<br>/, '');
-                        document.getElementById('tomorrowWeatherText').innerHTML = htmlTomorrow;
+                        
+                        // ▼ 先頭に「明日の天気は 」をくっつける！ ▼
+                        document.getElementById('tomorrowWeatherText').innerHTML = "明日の天気は " + htmlTomorrow;
                     }
                 } catch(e) {
-                    document.getElementById('tomorrowWeatherText').innerText = "取得不可";
+                    document.getElementById('tomorrowWeatherText').innerText = "明日の天気は 取得不可";
                 }
 
                 // 傘・服装アドバイス
