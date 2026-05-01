@@ -29,9 +29,10 @@
         .weather { font-size: 1.8rem; font-weight: normal; margin: 4px 0; line-height: 1.3; } 
         .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: baseline; }
         
-        .temp-container { margin-bottom: 8px; text-align: center; line-height: 1.2; white-space: nowrap; }
-        .temp { font-size: 2.7rem; font-weight: bold; display: inline-block; }
-        .humidity { font-size: 1.6rem; font-weight: normal; display: inline-block; margin-left: 8px; }
+        /* ▼ 気温と詳細データを改行して並べるように変更 ▼ */
+        .temp-container { margin-bottom: 8px; text-align: center; line-height: 1.2; }
+        .temp { font-size: 2.7rem; font-weight: bold; display: block; }
+        .humidity { font-size: 1.6rem; font-weight: normal; display: block; margin-top: 6px; }
         
         .advice-box { border: 3px solid #000; border-radius: 10px; padding: 5px; margin: 0 15px; text-align: left; font-weight: bold; }
         .advice-item {
@@ -62,7 +63,6 @@
         .tomorrow-box .weather-word { font-size: 2.2rem; font-weight: bold; margin: 0 2px; vertical-align: baseline; }
         .tomorrow-temp { font-size: 1.9rem; font-weight: bold; }
         
-        /* ▼ 明日の降水確率用のCSSを追加 ▼ */
         .tomorrow-pop { font-size: 1.4rem; font-weight: normal; margin-left: 6px; }
 
         .extra-info-box {
@@ -114,7 +114,6 @@
 
         <div class="tomorrow-box">
             <div class="tomorrow-weather" id="tomorrowWeatherText">明日は --</div>
-            <!-- ▼ 明日の気温の横に降水確率の表示枠を追加 ▼ -->
             <div class="tomorrow-temp">
                 <span id="tomorrowMinTemp">--</span>℃ / <span id="tomorrowMaxTemp">--</span>℃
                 <span class="tomorrow-pop">(降水 <span id="tomorrowPopText">--</span>%)</span>
@@ -122,7 +121,7 @@
         </div>
 
         <div class="extra-info-box">
-            <div id="trainText">・運行情報確認中...</div>
+            <!-- ▼ 運行情報を削除しました ▼ -->
             <div><a href="news.html" style="color: #000; text-decoration: none; border-bottom: 1px solid #000;">・今日のニュースを読む</a></div>
         </div>
     </div>
@@ -244,32 +243,6 @@
                     document.getElementById('maxTemp').innerText = "--";
                     document.getElementById('tomorrowMinTemp').innerText = "--";
                     document.getElementById('tomorrowMaxTemp').innerText = "--";
-                }
-
-                // 運行情報
-                try {
-                    const trainUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://transit.yahoo.co.jp/diainfo/rss/1/0&_=" + uniqueTime;
-                    const trainRes = await fetch(trainUrl);
-                    const trainData = await trainRes.json();
-                    
-                    let isDelayed = false;
-                    if (trainData.items) {
-                        for (let item of trainData.items) {
-                            if (item.title.includes("東海道線")) {
-                                isDelayed = true;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    const trainEl = document.getElementById('trainText');
-                    if (isDelayed) {
-                        trainEl.innerText = "・東海道線に遅れが出ています";
-                    } else {
-                        trainEl.innerText = "・東海道線は平常運転です";
-                    }
-                } catch (e) {
-                    document.getElementById('trainText').innerText = "・運行情報が取得できません";
                 }
 
                 // カウントダウン
