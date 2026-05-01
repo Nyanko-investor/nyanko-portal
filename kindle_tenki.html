@@ -29,10 +29,8 @@
         .weather { font-size: 1.8rem; font-weight: normal; margin: 4px 0; line-height: 1.3; } 
         .weather-word { font-size: 3.5rem; font-weight: bold; margin: 0 4px; vertical-align: baseline; }
         
-        /* 今日の気温と湿度を1行にまとめるCSS */
         .temp-container { margin-bottom: 8px; text-align: center; line-height: 1.2; white-space: nowrap; }
         .temp { font-size: 2.7rem; font-weight: bold; display: inline-block; }
-        /* ▼ 万が一横にはみ出す場合は、ここの 1.6rem を 1.4rem などに少し下げてください ▼ */
         .humidity { font-size: 1.6rem; font-weight: normal; display: inline-block; margin-left: 8px; }
         
         .advice-box { border: 3px solid #000; border-radius: 10px; padding: 5px; margin: 0 15px; text-align: left; font-weight: bold; }
@@ -63,6 +61,9 @@
         .tomorrow-weather { font-size: 1.4rem; font-weight: normal; margin-bottom: 4px; line-height: 1.3; }
         .tomorrow-box .weather-word { font-size: 2.2rem; font-weight: bold; margin: 0 2px; vertical-align: baseline; }
         .tomorrow-temp { font-size: 1.9rem; font-weight: bold; }
+        
+        /* ▼ 明日の降水確率用のCSSを追加 ▼ */
+        .tomorrow-pop { font-size: 1.4rem; font-weight: normal; margin-left: 6px; }
 
         .extra-info-box {
             margin: 10px 15px 15px 15px; 
@@ -96,7 +97,6 @@
             
             <div class="temp-container">
                 <span class="temp"><span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃</span>
-                <!-- ▼ プレースホルダーのテキストを変更しました ▼ -->
                 <span class="humidity" id="humidityText">(降水 --% / 湿度 --% / 風速 --m/s)</span>
             </div>
         </div>
@@ -114,7 +114,11 @@
 
         <div class="tomorrow-box">
             <div class="tomorrow-weather" id="tomorrowWeatherText">明日は --</div>
-            <div class="tomorrow-temp"><span id="tomorrowMinTemp">--</span>℃ / <span id="tomorrowMaxTemp">--</span>℃</div>
+            <!-- ▼ 明日の気温の横に降水確率の表示枠を追加 ▼ -->
+            <div class="tomorrow-temp">
+                <span id="tomorrowMinTemp">--</span>℃ / <span id="tomorrowMaxTemp">--</span>℃
+                <span class="tomorrow-pop">(降水 <span id="tomorrowPopText">--</span>%)</span>
+            </div>
         </div>
 
         <div class="extra-info-box">
@@ -139,7 +143,6 @@
                 
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
                 
-                // ▼ Open-MeteoのURLに precipitation_probability_max を追加 ▼
                 const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4437&longitude=139.6381&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
                 const response = await fetch(jmaUrl);
@@ -170,7 +173,6 @@
                 htmlWeather = htmlWeather.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
                 htmlWeather = htmlWeather.replace(/^<br>/, '');
                 document.getElementById('weatherText').innerHTML = htmlWeather;
-
 
                 // --- 明日の天気 ---
                 try {
@@ -208,9 +210,14 @@
                     
                     const humidity = meteoData.current.relative_humidity_2m;
                     const wind = meteoData.current.wind_speed_10m; 
-                    // ▼ 降水確率を取得してテキストを合成 ▼
-                    const pop = meteoData.daily.precipitation_probability_max[0];
-                    document.getElementById('humidityText').innerText = `(降水 ${pop}% / 湿度 ${humidity}% / 風速 ${wind}m/s)`;
+                    
+                    // 今日の降水確率
+                    const popToday = meteoData.daily.precipitation_probability_max[0];
+                    document.getElementById('humidityText').innerText = `(降水 ${popToday}% / 湿度 ${humidity}% / 風速 ${wind}m/s)`;
+
+                    // 明日の降水確率を追加
+                    const popTomorrow = meteoData.daily.precipitation_probability_max[1];
+                    document.getElementById('tomorrowPopText').innerText = popTomorrow;
 
                     const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
                     const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
@@ -231,8 +238,8 @@
                     document.getElementById('clothesText').innerText = clothesMsg;
 
                 } catch (e) {
-                    // ▼ エラー時のテキストも合わせて変更 ▼
                     document.getElementById('humidityText').innerText = "(降水 --% / 湿度 --% / 風速 --m/s)";
+                    document.getElementById('tomorrowPopText').innerText = "--";
                     document.getElementById('minTemp').innerText = "--";
                     document.getElementById('maxTemp').innerText = "--";
                     document.getElementById('tomorrowMinTemp').innerText = "--";
