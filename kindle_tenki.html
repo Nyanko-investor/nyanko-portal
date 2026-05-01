@@ -32,6 +32,7 @@
         /* 今日の気温と湿度を1行にまとめるCSS */
         .temp-container { margin-bottom: 8px; text-align: center; line-height: 1.2; white-space: nowrap; }
         .temp { font-size: 2.7rem; font-weight: bold; display: inline-block; }
+        /* ▼ 万が一横にはみ出す場合は、ここの 1.6rem を 1.4rem などに少し下げてください ▼ */
         .humidity { font-size: 1.6rem; font-weight: normal; display: inline-block; margin-left: 8px; }
         
         .advice-box { border: 3px solid #000; border-radius: 10px; padding: 5px; margin: 0 15px; text-align: left; font-weight: bold; }
@@ -95,7 +96,8 @@
             
             <div class="temp-container">
                 <span class="temp"><span id="minTemp">--</span>℃ / <span id="maxTemp">--</span>℃</span>
-                <span class="humidity" id="humidityText">(湿度 --% / 風速 --m/s)</span>
+                <!-- ▼ プレースホルダーのテキストを変更しました ▼ -->
+                <span class="humidity" id="humidityText">(降水 --% / 湿度 --% / 風速 --m/s)</span>
             </div>
         </div>
 
@@ -137,8 +139,8 @@
                 
                 const jmaUrl = "https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json?_=" + uniqueTime;
                 
-                // Open-MeteoのURLも元通り（今日の湿度・風速、今日と明日の気温のみ）に戻しました
-                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4437&longitude=139.6381&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&_=" + uniqueTime;
+                // ▼ Open-MeteoのURLに precipitation_probability_max を追加 ▼
+                const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=35.4437&longitude=139.6381&current=relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&_=" + uniqueTime;
 
                 const response = await fetch(jmaUrl);
                 const data = await response.json();
@@ -182,7 +184,6 @@
                         htmlTomorrow = htmlTomorrow.replace(weatherWordRegex, '<span class="weather-word">$1</span>');
                         htmlTomorrow = htmlTomorrow.replace(/^<br>/, '');
                         
-                        // ▼ 「明日は 」に変更 ▼
                         document.getElementById('tomorrowWeatherText').innerHTML = "明日は " + htmlTomorrow;
                     }
                 } catch(e) {
@@ -200,14 +201,16 @@
                     document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
                 }
 
-                // 気温と湿度
+                // 気温・湿度・風速・降水確率
                 try {
                     const meteoRes = await fetch(meteoUrl);
                     const meteoData = await meteoRes.json();
                     
                     const humidity = meteoData.current.relative_humidity_2m;
                     const wind = meteoData.current.wind_speed_10m; 
-                    document.getElementById('humidityText').innerText = `(湿度 ${humidity}% / 風速 ${wind}m/s)`;
+                    // ▼ 降水確率を取得してテキストを合成 ▼
+                    const pop = meteoData.daily.precipitation_probability_max[0];
+                    document.getElementById('humidityText').innerText = `(降水 ${pop}% / 湿度 ${humidity}% / 風速 ${wind}m/s)`;
 
                     const minT = Math.round(meteoData.daily.temperature_2m_min[0]);
                     const maxT = Math.round(meteoData.daily.temperature_2m_max[0]);
@@ -228,7 +231,8 @@
                     document.getElementById('clothesText').innerText = clothesMsg;
 
                 } catch (e) {
-                    document.getElementById('humidityText').innerText = "(湿度 --% / 風速 --m/s)";
+                    // ▼ エラー時のテキストも合わせて変更 ▼
+                    document.getElementById('humidityText').innerText = "(降水 --% / 湿度 --% / 風速 --m/s)";
                     document.getElementById('minTemp').innerText = "--";
                     document.getElementById('maxTemp').innerText = "--";
                     document.getElementById('tomorrowMinTemp').innerText = "--";
