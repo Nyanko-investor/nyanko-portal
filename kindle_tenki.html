@@ -191,14 +191,13 @@
                 }
 
                 // 傘・服装アドバイス (気象庁の予報ベース)
+                let umbrellaMessage = "今日は持たなくていいよ！";
+
                 if (cleanWeather.startsWith('雨') || cleanWeather.startsWith('雪') || cleanWeather.startsWith('雷雨')) {
-                    document.getElementById('umbrellaText').innerText = "傘を忘れないで持っていこう！";
+                    umbrellaMessage = "傘を忘れないで持っていこう！";
                 } 
                 else if (cleanWeather.includes('雨') || cleanWeather.includes('雪') || cleanWeather.includes('雷雨')) {
-                    document.getElementById('umbrellaText').innerText = "折りたたみ傘があると安心！";
-                } 
-                else {
-                    document.getElementById('umbrellaText').innerText = "今日は持たなくていいよ！";
+                    umbrellaMessage = "折りたたみ傘があると安心！";
                 }
 
                 // 気温・湿度・風速・降水確率・現在の降雨判定
@@ -212,6 +211,17 @@
                     // 今日の降水確率
                     const popToday = meteoData.daily.precipitation_probability_max[0];
                     document.getElementById('humidityText').innerText = `(降水確率 ${popToday}% / 湿度 ${humidity}% / 風速 ${wind}m/s)`;
+
+                    // 降水確率も加味して傘アドバイスを補正
+                    if (popToday >= 80) {
+                        umbrellaMessage = "傘を忘れないで持っていこう！";
+                    } else if (popToday >= 50) {
+                        if (umbrellaMessage !== "傘を忘れないで持っていこう！") {
+                            umbrellaMessage = "折りたたみ傘があると安心！";
+                        }
+                    }
+
+                    document.getElementById('umbrellaText').innerText = umbrellaMessage;
 
                     // 明日の降水確率
                     const popTomorrow = meteoData.daily.precipitation_probability_max[1];
