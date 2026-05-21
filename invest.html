@@ -15,8 +15,6 @@
             --border-color: #e2e8f0;
             --header-bg: #1a253a;
             --tech-cyan: #1de9b6;
-            /* Quest Colors */
-            --quest-green: #059669; --quest-cyan: #0891b2; --quest-blue: #2563eb; --quest-purple: #7c3aed; --quest-god: #d97706;
         }
 
         * { box-sizing: border-box; }
@@ -199,27 +197,29 @@
 
                 <h3>1. 📉 ナンピン買い注文ルールの計算式</h3>
                 <div class="algo-box">
-                    <span class="algo-title">注文ルールの計算式（絶対遵守）</span>
+                    <span class="algo-title">注文ルールの計算式（絶対遵守・分割後仕様）</span>
                     <div class="algo-formula">
-                        1545の注文口数 ＝ ( N － 1 ) × <span style="color:var(--nyanko-blue)">倍率</span>
+                        1545の注文口数 ＝ ( N － 1 ) × <span style="color:var(--nyanko-blue)">分割後ベース口数</span>
                     </div>
                     <div class="algo-desc">
                         <strong>📌 変数「N」の定義：</strong><br>
                         最高値からの下落率（％）の<strong>「整数部分」</strong>。<br>
                         <em>例： -3.5% ➡ N=3 ／ -15.9% ➡ N=15</em>
                     </div>
+                    <br>
                     <div class="algo-desc">
-                        <strong>📌 変数「倍率」の定義（Quest to God 連動）：</strong><br>
-                        現在の総資産規模（億の位）に連動する。<br>
+                        <strong>📌 変数「分割後ベース口数」の定義（Quest to God 連動）：</strong><br>
+                        現在の総資産規模（億の位）に応じて、発注の基礎となる口数を自動決定する。<br>
                         <table class="multiplier-table">
-                            <tr><th>資産規模</th><th>倍率</th></tr>
-                            <tr><td>〜1.9 億円</td><td><strong>× 1 倍</strong></td></tr>
-                            <tr><td>2 億円台</td><td><strong>× 2 倍</strong></td></tr>
-                            <tr><td>3 億円台</td><td><strong>× 3 倍</strong></td></tr>
-                            <tr><td>5 億円台</td><td><strong>× 5 倍</strong></td></tr>
-                            <tr><td>10 億円〜</td><td style="color:var(--nyanko-gold);"><strong>× 10 倍</strong></td></tr>
+                            <tr><th>資産規模</th><th>分割後ベース口数</th><th>備考</th></tr>
+                            <tr><td>〜1.9 億円</td><td><strong>200 口</strong></td><td><strong>NOW Lv.43（等倍迎撃）</strong></td></tr>
+                            <tr><td>2 億円台</td><td><strong>400 口</strong></td><td>（旧×2倍）</td></tr>
+                            <tr><td>3 億円台</td><td><strong>600 口</strong></td><td>（旧×3倍）</td></tr>
+                            <tr><td>5 億円台</td><td><strong>1,000 口</strong></td><td>（旧×5倍）</td></tr>
+                            <tr><td>10 億円〜</td><td style="color:var(--nyanko-gold);"><strong>2,000 口</strong></td><td>（旧×10倍）</td></tr>
                         </table>
                     </div>
+                    <br>
                     <div class="safety-box">
                         <span style="color:#c53030; font-weight:bold; display:flex; align-items:center; margin-bottom:10px;">🛡️ 安全装置 (Safety Valve)</span>
                         <p style="margin:5px 0 15px 0; font-size:0.95em; color:#4a5568;">
