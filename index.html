@@ -23,7 +23,7 @@
         .search-input { width: 100%; padding: 12px 20px 12px 45px; font-size: 1.1rem; border: 1px solid #dfe1e5; border-radius: 24px; outline: none; box-shadow: 0 1px 6px rgba(32,33,36,0.20); box-sizing: border-box; -webkit-appearance: none; }
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9aa0a6; font-size: 1.2rem; }
 
-        /* ★ 新追加：お天気ウィジェットのスタイル ★ */
+        /* お天気ウィジェットのスタイル */
         .weather-widget { max-width: 580px; margin: 0 auto 40px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .weather-main { font-size: 1.2rem; font-weight: bold; color: var(--nyanko-blue); margin-bottom: 5px; }
         .weather-main span.icon { font-size: 1.4rem; margin-right: 5px; }
@@ -38,22 +38,8 @@
         .q-btn span { margin-right: 6px; font-size: 1.1em; }
         .btn-nyanq { background: #fffaf0; border-color: var(--bruna-yellow); }
 
-        /* 計算機エリア */
-        .calc-area { background: #f0fff4; border: 2px solid #38a169; border-radius: 12px; padding: 25px 15px; max-width: 650px; margin: 0 auto 50px; text-align: center; width: 95%; }
-        .stock-btn { background: var(--nyanko-blue); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; font-weight: bold; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
-        .calc-row { display: flex; justify-content: center; align-items: flex-end; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .calc-label-group { display: flex; flex-direction: column; align-items: flex-start; }
-        .calc-label { font-size: 0.8rem; color: #2f855a; font-weight: bold; margin-bottom: 4px; }
-        .calc-input-field { padding: 10px; font-size: 1.1rem; width: 105px; border-radius: 5px; border: 1px solid #ccc; text-align: right; font-family: 'Courier New', monospace; background: #fff; }
-        #highPrice { background-color: #fffaf0; border-color: #ed8936; color: #c05621; font-weight: bold; }
-        .calc-btn { background: #2f855a; color: white; border: none; padding: 12px 25px; font-size: 1.1rem; border-radius: 5px; cursor: pointer; font-weight: bold; height: 45px; }
-        
-        .calc-result { font-size: 1.2rem; font-weight: bold; color: #c05621; background: #fff; padding: 20px; border-radius: 8px; margin-top: 15px; border: 2px solid #e2e8f0; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .result-main { font-size: 1.8rem; color: var(--nyanko-red); border-bottom: 3px solid var(--nyanko-red); padding-bottom: 5px; margin-top: 5px; }
-
         /* 下部ナビゲーション */
-        .doc-section { margin-top: 50px; padding-bottom: 60px; text-align: center; }
+        .doc-section { margin-top: 20px; padding-bottom: 60px; text-align: center; }
         .doc-label { font-weight: bold; color: #4a5568; margin-bottom: 15px; font-size: 0.9rem; display: block; }
         .doc-nav { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .nav-link { display: inline-block; padding: 10px 20px; background: var(--nyanko-blue); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem; min-width: 100px; text-align: center; }
@@ -61,7 +47,7 @@
         .nav-link-alert { background: var(--nyanko-red); box-shadow: 0 4px 6px rgba(229, 62, 62, 0.3); }
         .nav-link-alert:hover { background: #c53030; box-shadow: 0 6px 8px rgba(229, 62, 62, 0.4); transform: translateY(-2px); transition: all 0.2s; }
         
-        @media (max-width: 600px) { .calc-input-field { width: 95px; } .nav-link { padding: 10px 15px; } }
+        @media (max-width: 600px) { .nav-link { padding: 10px 15px; } }
     </style>
 </head>
 <body>
@@ -107,30 +93,6 @@
             <a href="https://vercel.com/" target="_blank" class="q-btn"><span>🚀</span>Vercel</a>
         </div>
 
-        <div class="calc-area">
-            <span style="color:#2f855a; font-weight:bold; margin-bottom:15px; display:block;">🐈 ニャンコ式：買い付け計算機</span>
-            
-            <button class="stock-btn" onclick="window.open('https://www.google.com/search?q=1545+株価', 'stock_win', 'width=450,height=600')">
-                📊 別窓で 1545 の現在値を確認
-            </button>
-
-            <div class="calc-row">
-                <div class="calc-label-group"><label class="calc-label">👑 最高値</label><input type="number" id="highPrice" class="calc-input-field" placeholder="41470"></div>
-                <span style="font-size:2rem; color:#ccc; margin-bottom:5px;">-</span>
-                <div class="calc-label-group"><label class="calc-label">📉 現在値</label><input type="number" id="currentPrice" class="calc-input-field" placeholder="40000"></div>
-                <div class="calc-label-group">
-                    <label class="calc-label">⚔️ 倍率</label>
-                    <select id="multiplier" class="calc-input-field" style="width:90px; height:45px; text-align:center;">
-                        <option value="1">1倍</option><option value="2">2倍</option><option value="3">3倍</option><option value="5">5倍</option><option value="10">10倍</option>
-                    </select>
-                </div>
-                <button onclick="calculate()" class="calc-btn">計算</button>
-            </div>
-            <div id="resultOutput" class="calc-result">
-                <span style="color:#718096;">ここに結果が出ます</span>
-            </div>
-        </div>
-
         <div class="doc-section">
             <span class="doc-label">▼ 社内規定・戦略ドキュメント ▼</span>
             <div class="doc-nav">
@@ -144,7 +106,7 @@
     </div>
 
     <script>
-        // ★ 新追加：お天気ウィジェットの取得ロジック ★
+        // お天気ウィジェットの取得ロジック
         async function fetchWeather() {
             try {
                 // 気象庁とOpen-Meteoのデータを取得
@@ -222,36 +184,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // お天気の取得を開始！
             fetchWeather();
-
-            // 計算機のキャッシュ読み込み
-            const saved = localStorage.getItem('nyankoHighPrice');
-            if (saved) document.getElementById('highPrice').value = saved;
         });
-
-        // 計算機のロジック
-        function calculate() {
-            let h = parseFloat(document.getElementById('highPrice').value);
-            let c = parseFloat(document.getElementById('currentPrice').value);
-            let m = parseFloat(document.getElementById('multiplier').value);
-            let res = document.getElementById('resultOutput');
-
-            if (!h || !c) { res.innerHTML = "<span style='color:#c05621'>価格を入力してください 😿</span>"; return; }
-            localStorage.setItem('nyankoHighPrice', h);
-
-            let drop = ((h - c) / h) * 100;
-            let N = Math.floor(drop);
-            let units = (N - 1) * m;
-
-            if (drop < 0) {
-                res.innerHTML = "🎉 新高値更新中！";
-            }
-            else if (units <= 0) {
-                res.innerHTML = `<div>📉 下落率 ${drop.toFixed(1)}%</div><div style='color:#718096; font-size:1.5rem; margin-top:5px;'>まだ待機！</div>`;
-            }
-            else {
-                res.innerHTML = `<div style='color:var(--nyanko-red); font-size:1.5rem;'>🚨 GO! (下落 ${drop.toFixed(1)}%)</div><div class='result-main'>注文数：${units} 口</div>`;
-            }
-        }
     </script>
 </body>
 </html>
