@@ -1,191 +1,771 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nyanko Portal!</title>
-    <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐈</text></svg>">
-    <style>
-        :root { 
-            --nyanko-navy: #1a253a; --nyanko-blue: #2c5282; --nyanko-gold: #c05621; --nyanko-red: #e53e3e; --nyanko-gray: #f7fafc; --text-main: #2d3748;
-            --bruna-red: #df0024; --bruna-blue: #002e7a; --bruna-yellow: #ffcc00; --bruna-green: #009640;
-        }
-        * { box-sizing: border-box; }
-        body { font-family: "Helvetica Neue", Arial, sans-serif; line-height: 1.8; color: var(--text-main); background-color: #f8f9fa; margin: 0; padding: 0; overflow-x: hidden; }
-        .portal-header { text-align: center; padding: 40px 15px 30px; background-color: #fff; }
-        
-        /* ブルーナカラーロゴ */
-        .nyanko-logo { font-size: clamp(3rem, 12vw, 4.5rem); font-weight: bold; letter-spacing: -2px; margin-bottom: 30px; font-family: 'Century Gothic', Futura, sans-serif; line-height: 1.1; }
-        .n1 { color: var(--bruna-red); } .y1 { color: var(--bruna-blue); } .a1 { color: var(--bruna-yellow); } .n2 { color: var(--bruna-green); } .k1 { color: var(--bruna-red); } .o1 { color: var(--bruna-blue); } .exc { color: var(--bruna-yellow); }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>聴く文学 | 31作家・約2000作品をオフラインで持ち歩く</title>
+  <meta
+    name="description"
+    content="聴く文学は、31作家・約2000作品を収録した買い切り型の文学アプリです。オフライン再生、広告なし、作家別パック、差額アップグレードに対応。"
+  />
+  <style>
+    :root {
+      --bg: #f6f0e7;
+      --card: #fffaf4;
+      --card-strong: #f4e7d7;
+      --text: #2e261f;
+      --muted: #6e6258;
+      --accent: #6b4f3a;
+      --accent-2: #b08b62;
+      --line: #dfd2c3;
+      --shadow: 0 10px 30px rgba(40, 30, 20, 0.08);
+      --radius: 20px;
+      --max: 1120px;
+    }
 
-        .search-box-wrapper { max-width: 580px; margin: 0 auto 30px; position: relative; }
-        .search-input { width: 100%; padding: 12px 20px 12px 45px; font-size: 1.1rem; border: 1px solid #dfe1e5; border-radius: 24px; outline: none; box-shadow: 0 1px 6px rgba(32,33,36,0.20); box-sizing: border-box; -webkit-appearance: none; }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9aa0a6; font-size: 1.2rem; }
+    * { box-sizing: border-box; }
 
-        /* お天気ウィジェットのスタイル */
-        .weather-widget { max-width: 580px; margin: 0 auto 40px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .weather-main { font-size: 1.2rem; font-weight: bold; color: var(--nyanko-blue); margin-bottom: 5px; }
-        .weather-main span.icon { font-size: 1.4rem; margin-right: 5px; }
-        .weather-sub { font-size: 0.9rem; color: #4a5568; background: #edf2f7; display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold;}
-        .weather-loading { color: #a0aec0; font-size: 0.9rem; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+        "Yu Gothic UI", "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
 
-        /* リンクボタン群 */
-        .quick-links { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; padding: 0 10px; max-width: 900px; margin-left: auto; margin-right: auto; }
-        .q-btn { display: flex; align-items: center; padding: 8px 12px; background: #fff; color: #3c4043; text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: bold; border: 1px solid #e2e8f0; transition: 0.2s; white-space: nowrap; }
-        .q-btn:hover { background: #f8f9fa; transform: translateY(-2px); border-color: #cbd5e0; }
-        .q-btn span { margin-right: 6px; font-size: 1.1em; }
-        .btn-nyanq { background: #fffaf0; border-color: var(--bruna-yellow); }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; border-radius: 16px; }
 
-        /* 下部ナビゲーション */
-        .doc-section { margin-top: 20px; padding-bottom: 60px; text-align: center; }
-        .doc-label { font-weight: bold; color: #4a5568; margin-bottom: 15px; font-size: 0.9rem; display: block; }
-        .doc-nav { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .nav-link { display: inline-block; padding: 10px 20px; background: var(--nyanko-blue); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem; min-width: 100px; text-align: center; }
-        .nav-link:hover { background: #1a365d; }
-        .nav-link-alert { background: var(--nyanko-red); box-shadow: 0 4px 6px rgba(229, 62, 62, 0.3); }
-        .nav-link-alert:hover { background: #c53030; box-shadow: 0 6px 8px rgba(229, 62, 62, 0.4); transform: translateY(-2px); transition: all 0.2s; }
-        
-        @media (max-width: 600px) { .nav-link { padding: 10px 15px; } }
-    </style>
+    .wrap {
+      width: min(calc(100% - 32px), var(--max));
+      margin: 0 auto;
+    }
+
+    header { padding: 24px 0; }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .brand-badge {
+      width: 36px; height: 36px;
+      border-radius: 999px;
+      display: grid; place-items: center;
+      background: var(--accent);
+      color: white; font-size: 14px;
+    }
+
+    .hero {
+      padding: 34px 0 56px;
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.45);
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(34px, 6vw, 60px);
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+    }
+
+    .lead {
+      margin: 0 0 24px;
+      font-size: clamp(16px, 2.3vw, 19px);
+      color: var(--muted);
+      max-width: 37em;
+    }
+
+    .actions {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      min-height: 48px; padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: white;
+      box-shadow: var(--shadow);
+      font-weight: 700;
+    }
+
+    .btn.primary {
+      background: var(--accent); color: white; border-color: var(--accent);
+    }
+
+    .subnote { font-size: 14px; color: var(--muted); }
+
+    .hero-card {
+      background: linear-gradient(180deg, #fffdf9, #f3e8da);
+      border: 1px solid var(--line);
+      border-radius: 28px; padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    section { padding: 28px 0 44px; }
+
+    .section-title {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.25;
+    }
+
+    .section-desc { margin: 0 0 24px; color: var(--muted); }
+
+    .grid-2, .grid-3, .grid-4 { display: grid; gap: 18px; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card.strong { background: var(--card-strong); }
+
+    .card h3 { margin: 0 0 8px; font-size: 18px; line-height: 1.35; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+
+    .mini-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px; margin-top: 20px;
+    }
+
+    .metric {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px; padding: 14px 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric .num {
+      font-size: 26px; font-weight: 800;
+      line-height: 1.1; margin-bottom: 4px;
+    }
+
+    .metric .label { font-size: 13px; color: var(--muted); }
+
+    .screens {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+    }
+
+    .screen-card {
+      background: white; border: 1px solid var(--line);
+      border-radius: 22px; padding: 14px; box-shadow: var(--shadow);
+    }
+
+    .screen-card p { margin: 12px 4px 4px; font-size: 14px; color: var(--muted); }
+
+    .author-list {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px 18px; margin: 0; padding: 0; list-style: none;
+    }
+
+    .author-list li {
+      padding: 10px 12px; background: white;
+      border: 1px solid var(--line); border-radius: 14px;
+      font-size: 14px; box-shadow: var(--shadow);
+    }
+
+    .work-picks {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .work-picks h4 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .work-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .work-chip-list li {
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .pricing-wrap {
+      display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px;
+    }
+
+    .price-box {
+      padding: 22px; border-radius: 22px;
+      border: 1px solid var(--line); box-shadow: var(--shadow); background: white;
+    }
+
+    .price-box.featured {
+      background: linear-gradient(180deg, #fff9f1, #f2e3cf);
+    }
+
+    .price {
+      font-size: 42px; font-weight: 800; line-height: 1; margin: 8px 0 12px;
+    }
+
+    .price-note { font-size: 14px; color: var(--muted); margin-bottom: 14px; }
+
+    .bullet { margin: 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
+    .bullet li + li { margin-top: 6px; }
+
+    .flow {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    }
+
+    .flow .step {
+      background: white; border: 1px solid var(--line);
+      border-radius: 18px; padding: 18px; box-shadow: var(--shadow);
+    }
+
+    .step .step-no {
+      display: inline-block; margin-bottom: 10px;
+      font-size: 12px; font-weight: 700; color: var(--accent);
+      border: 1px solid var(--line); border-radius: 999px;
+      padding: 4px 8px; background: rgba(255,255,255,0.6);
+    }
+
+    .step h4 { margin: 0 0 6px; font-size: 16px; }
+    .step p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .faq { display: grid; gap: 12px; }
+
+    .faq details {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow);
+    }
+
+    .faq summary { cursor: pointer; font-weight: 700; }
+    .faq p { margin: 10px 0 0; color: var(--muted); }
+
+    .cta { text-align: center; padding: 56px 0 80px; }
+
+    footer { padding: 24px 0 40px; color: var(--muted); font-size: 14px; }
+
+    /* 免責ボックス */
+    .disclaimer {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 22px;
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    @media (max-width: 960px) {
+      .hero, .grid-2, .grid-3, .grid-4,
+      .screens, .pricing-wrap, .flow,
+      .mini-metrics, .author-list {
+        grid-template-columns: 1fr;
+      }
+      .hero { padding-top: 20px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="portal-header">
-        <div class="nyanko-logo">
-            <span class="n1">N</span><span class="y1">y</span><span class="a1">a</span><span class="n2">n</span><span class="k1">k</span><span class="o1">o</span><span class="exc">!</span>
-        </div>
-
-        <div class="search-box-wrapper">
-            <form action="https://www.google.com/search" method="get" class="search-form" target="_blank">
-                <span class="search-icon">🔍</span>
-                <input type="text" name="q" class="search-input" placeholder="Google で検索" autofocus>
-            </form>
-        </div>
-
-        <div id="weather-widget" class="weather-widget">
-            <div class="weather-loading">☁️ 最新の気象データを取得中...</div>
-        </div>
-
-        <div class="quick-links">
-            <a href="kindle_tenki.html" target="_blank" class="q-btn" style="border-color:#2b6cb0; background:#ebf8ff;"><span>📱</span>Kindle天気</a>
-            <a href="news.html" target="_blank" class="q-btn" style="border-color:#2b6cb0; background:#ebf8ff;"><span>🗞️</span>Kindleニュース</a>
-            
-            <a href="https://gemini.google.com/" target="_blank" class="q-btn" style="border-color:#4285F4;"><span>✨</span>Gemini</a>
-            <a href="https://chatgpt.com/" target="_blank" class="q-btn"><span>🤖</span>ChatGPT</a>
-            <a href="https://notion.so/" target="_blank" class="q-btn"><span>📓</span>Notion</a>
-            <a href="https://note.com/" target="_blank" class="q-btn"><span>📝</span>note</a>
-            
-            <a href="https://nyanqv4-1eeo.glide.page" target="_blank" class="q-btn btn-nyanq"><span>💎</span>NyanQ</a>
-            <a href="https://kikubungaku.vercel.app/" target="_blank" class="q-btn" style="border-color:#c05621; background:#fffaf0;"><span>📚</span>聴く文学</a>
-            <a href="https://www.rakuten-sec.co.jp/" target="_blank" class="q-btn"><span>📈</span>楽天証券</a>
-            <a href="https://www.sbisec.co.jp/" target="_blank" class="q-btn"><span>🔵</span>SBI証券</a>
-            <a href="https://www.matsui.co.jp/" target="_blank" class="q-btn"><span>🟢</span>松井証券</a>
-
-            <a href="https://www.amazon.co.jp/" target="_blank" class="q-btn"><span>📦</span>Amazon</a>
-            <a href="https://www.rakuten.co.jp/" target="_blank" class="q-btn"><span>🛒</span>楽天市場</a>
-
-            <a href="https://www.yayoi-kk.co.jp/" target="_blank" class="q-btn"><span>📒</span>弥生会計</a>
-            <a href="https://kyosai-web.smrj.go.jp/" target="_blank" class="q-btn"><span>🛡️</span>セーフティ共済</a>
-            <a href="https://news.yahoo.co.jp/" target="_blank" class="q-btn"><span>📰</span>ヤフーニュース</a>
-            <a href="https://finance.yahoo.co.jp/" target="_blank" class="q-btn"><span>📊</span>ヤフーファイナンス</a>
-            
-            <a href="https://github.com/" target="_blank" class="q-btn"><span>🐙</span>GitHub</a>
-            <a href="https://vercel.com/" target="_blank" class="q-btn"><span>🚀</span>Vercel</a>
-        </div>
-
-        <div class="doc-section">
-            <span class="doc-label">▼ 社内規定・戦略ドキュメント ▼</span>
-            <div class="doc-nav">
-                <a href="philosophy.html" class="nav-link">🏠 理念</a>
-                <a href="invest.html" class="nav-link">📈 投資</a>
-                <a href="cross.html" class="nav-link">⚔️ 借金クロス</a>
-                <a href="roadmap.html" class="nav-link">📅 計画</a>
-                <a href="secret.html" class="nav-link nav-link-alert">🔥 裏マニュアル</a>
-            </div>
-        </div>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <div class="brand-badge">聴</div>
+        <span>聴く文学</span>
+      </div>
     </div>
+  </header>
 
-    <script>
-        // お天気ウィジェットの取得ロジック
-        async function fetchWeather() {
-            try {
-                // 気象庁とOpen-Meteoのデータを取得
-                const [jmaRes, meteoRes] = await Promise.all([
-                    fetch("https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json"),
-                    fetch("https://api.open-meteo.com/v1/forecast?latitude=35.45&longitude=139.65&current=relative_humidity_2m&timezone=Asia%2FTokyo")
-                ]);
-                
-                const jmaData = await jmaRes.json();
-                const meteoData = await meteoRes.json();
-                
-                const humidity = meteoData.current.relative_humidity_2m;
-                
-                // 天気テキストの整形
-                let rawWeather = jmaData[0].timeSeries[0].areas[0].weathers[0].replace(/　/g, " ");
-                let words = rawWeather.split(" ");
-                let main = words[0];
-                if (main.includes("晴")) main = "晴れ";
-                else if (main.includes("雨")) main = "雨";
-                else if (main.includes("雪")) main = "雪";
-                else if (main.includes("くもり") || main.includes("曇")) main = "くもり";
-                
-                let sub = "";
-                for (let i = 1; i < words.length; i++) {
-                    if (words[i].includes("晴") && main !== "晴れ") sub = "晴れ";
-                    else if (words[i].includes("雨") && main !== "雨") sub = "雨";
-                    else if (words[i].includes("雪") && main !== "雪") sub = "雪";
-                    else if ((words[i].includes("くもり") || words[i].includes("曇")) && main !== "くもり") sub = "くもり";
-                }
-                let weatherShort = sub ? `${main}一時${sub}` : main;
+  <main>
+    <!-- ヒーロー -->
+    <section class="wrap hero">
+      <div>
+        <div class="eyebrow">31作家・約2000作品収録の買い切り型文学アプリ</div>
+        <h1>日本の名作2000冊を、<br>ポケットに入れて歩く。</h1>
+        <p class="lead">
+          インストールするだけで、31作家・約2000作品がすべて端末に入ります。
+          通信不要・広告なし。月額課金もありません。
+          通勤中に、寝る前に、旅先で。一度手に入れたら、どこでも、いつまでも。
+        </p>
 
-                // お天気アイコンの自動判定
-                let icon = "☁️";
-                if (main === "晴れ") icon = "☀️";
-                else if (main === "雨") icon = "☔️";
-                else if (main === "雪") icon = "⛄️";
-                
-                // 降水確率
-                let pop = jmaData[0].timeSeries[1].areas[0].pops[0] || "0";
-                
-                // 気温の振り分け（昼間の更新バグ対策済）
-                let temps = jmaData[0].timeSeries[2].areas[0].temps;
-                let minTemp = "--", maxTemp = "--";
-                if (temps && temps.length >= 2) {
-                    let t1 = parseInt(temps[0]);
-                    let t2 = parseInt(temps[1]);
-                    minTemp = Math.min(t1, t2).toString();
-                    maxTemp = Math.max(t1, t2).toString();
-                } else if (temps && temps.length === 1) {
-                    maxTemp = temps[0];
-                }
-                
-                // 傘と服のアドバイス
-                let maxT = parseInt(maxTemp) || 20;
-                let popInt = parseInt(pop);
-                let umbrella = popInt >= 50 ? "かならず持参" : popInt >= 30 ? "おりたたみ推奨" : "今日は不要";
-                let clothes = maxT >= 25 ? "はんそで" : maxT >= 20 ? "ながそで" : maxT >= 15 ? "上着" : "コート";
+        <div class="actions">
+          <a class="btn primary" href="#pricing">価格を見る</a>
+          <a class="btn" href="#lineup">ラインナップを見る</a>
+        </div>
 
-                // HTMLに流し込む
-                const widget = document.getElementById("weather-widget");
-                widget.innerHTML = `
-                    <div class="weather-main"><span class="icon">${icon}</span>【横浜】${weatherShort}</div>
-                    <div style="font-size: 1.05rem; margin-bottom: 8px;">
-                        気温: <b>${maxTemp}℃</b> / <b>${minTemp}℃</b> (湿${humidity}%) | 降水: <b>${pop}%</b>
-                    </div>
-                    <div class="weather-sub">🌂 傘: ${umbrella} ｜ 👕 服: ${clothes}</div>
-                `;
-            } catch (error) {
-                console.error("天気取得エラー", error);
-                document.getElementById("weather-widget").innerHTML = "天気データの取得に失敗しました😿";
-            }
-        }
+        <p class="subnote">
+          ※ 本アプリはお使いのスマートフォン標準の読み上げ機能（TTS）を使用しています。
+          文脈によって読み方が変わる語句を中心に、一部読み間違いが発生する場合があります。
+        </p>
 
-        // ページ読み込み時に実行する処理まとめ
-        document.addEventListener('DOMContentLoaded', () => {
-            // お天気の取得を開始！
-            fetchWeather();
-        });
-    </script>
+        <div class="mini-metrics">
+          <div class="metric">
+            <div class="num">31</div>
+            <div class="label">作家</div>
+          </div>
+          <div class="metric">
+            <div class="num">約2000</div>
+            <div class="label">作品</div>
+          </div>
+          <div class="metric">
+            <div class="num">¥980</div>
+            <div class="label">全解放・買い切り</div>
+          </div>
+          <div class="metric">
+            <div class="num">¥370</div>
+            <div class="label">作家別パック</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <img
+          src="https://placehold.co/720x900?text=%E8%81%B4%E3%81%8F%E6%96%87%E5%AD%A6+App+Preview"
+          alt="聴く文学アプリのプレビュー"
+        />
+      </div>
+    </section>
+
+    <section class="wrap">
+      <h2 class="section-title">聴く文学が選ばれる6つの理由</h2>
+      <p class="section-desc">
+        大量収録・完全オフライン・広告なしの買い切り・誤読対策・睡眠導入・BGM対応。
+        「名作を聴く」という体験に、本気で向き合いました。
+      </p>
+
+      <div class="grid-4">
+        <div class="card">
+          <h3>インストールで全作品入り</h3>
+          <p>作品を一冊ずつ探してダウンロードする手間はありません。入れた瞬間から、31作家・約2000作品がすべて手元にあります。</p>
+        </div>
+        <div class="card">
+          <h3>完全オフライン対応</h3>
+          <p>通信が不要なので、地下鉄・機内・山の中でも再生できます。データ通信量もかかりません。</p>
+        </div>
+        <div class="card">
+          <h3>広告なし・買い切り</h3>
+          <p>朗読の途中で広告が入ることはありません。¥980の全作品買い切り、または¥370の作家別パックで、広告なしの読書体験をお楽しみいただけます。</p>
+        </div>
+        <div class="card">
+          <h3>誤読を減らす独自エンジン</h3>
+          <p>固有名詞の一貫した読み、作家が意図したルビの正確な再現、文脈によって読み方が変わる語句への対応など、原文の意図を損なわない読み上げを実現するため、独自の読み上げ最適化システムを開発しました。</p>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:18px;">
+        <div class="card">
+          <h3>睡眠導入にも</h3>
+          <p>穏やかな読み上げ音声をBGMと組み合わせれば、眠りにつく前のひとときにぴったりです。目を閉じたまま、名作の世界に入っていけます。</p>
+        </div>
+        <div class="card">
+          <h3>お手持ちの音楽をBGMに</h3>
+          <p>スマートフォン内の音楽をBGMとして流しながら朗読を楽しめます。自分だけの読書空間をつくれます。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 差別化 -->
+    <section class="wrap">
+      <h2 class="section-title">既存の朗読アプリとの違い</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>「清」はずっと「きよ」と読む</h3>
+          <p>
+            一般的な読み上げアプリでは『坊っちゃん』の「清」が、場面によって「きよ」「きよし」「せい」とバラバラに読まれることがあります。
+            聴く文学では、登場人物の名前が最後まで一貫して読まれるよう、約2000作品分の台本データを独自に整備しています。
+          </p>
+        </div>
+        <div class="card">
+          <h3>都度ダウンロード不要</h3>
+          <p>
+            多くの朗読アプリは作品ごとにダウンロードが必要です。
+            聴く文学はインストール時にすべての作品データが端末に入るため、「聴きたいと思ったらすぐ再生できる」が実現できています。
+          </p>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <strong>【読み上げ（TTS）に関するご案内】</strong><br>
+        本アプリはお使いのスマートフォンに標準搭載されている読み上げ機能（OS標準TTS）を使用しています。
+        青空文庫のテキストをより自然な日本語で発音させるため、独自の解析システム（一部AIによるルビ推論を含む）を用いて読み上げ用の台本データを整備しています。
+        ただし、文脈によって読み方が変わる語句を中心に読み間違いが発生する場合があります。
+        人間のナレーターによる録音とは異なる点をご了承の上お楽しみください。
+        お使いの端末・OSバージョン・TTSエンジンによって、読み上げの印象が異なる場合があります。
+      </div>
+    </section>
+
+    <!-- カラオケ・目次・あらすじ -->
+    <section class="wrap">
+      <h2 class="section-title">読みながら聴ける、探しやすい</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>カラオケ式ハイライト</h3>
+          <p>読み上げ中の箇所がリアルタイムで強調表示されます。耳で聴きながら目でも追えるので、聴き逃しても文字で確認できます。</p>
+        </div>
+        <div class="card">
+          <h3>目次・あらすじ・タグ</h3>
+          <p>各作品にはあらすじとタグを用意。「怪奇」「恋愛」「短編」などのタグで、気分に合った作品をすぐに探せます。</p>
+        </div>
+        <div class="card">
+          <h3>続きから再生</h3>
+          <p>前回聴いた位置を記憶しています。長編を少しずつ読み進めても、どこまで聴いたか迷いません。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ラインナップ -->
+    <section class="wrap" id="lineup">
+      <h2 class="section-title">ラインナップ</h2>
+      <p class="section-desc">
+        国民的な文豪から、知る人ぞ知る作家まで。31作家を収録しています。
+      </p>
+
+      <div class="grid-2">
+        <div class="card strong">
+          <h3>Aグループ（全作品収録・17作家）</h3>
+          <p style="margin-bottom:14px;">
+            各作家のほぼ全作品を収録。作家別パック（¥370）の対象です。
+          </p>
+          <ul class="author-list">
+            <li>夏目漱石</li>
+            <li>太宰治</li>
+            <li>芥川龍之介</li>
+            <li>宮沢賢治</li>
+            <li>江戸川乱歩</li>
+            <li>中島敦</li>
+            <li>坂口安吾</li>
+            <li>谷崎潤一郎</li>
+            <li>夢野久作</li>
+            <li>吉川英治</li>
+            <li>菊池寛</li>
+            <li>梶井基次郎</li>
+            <li>新美南吉</li>
+            <li>織田作之助</li>
+            <li>林芙美子</li>
+            <li>室生犀星</li>
+            <li>岡本綺堂</li>
+          </ul>
+          <div class="work-picks">
+            <h4>無料で試しやすい代表作</h4>
+            <ul class="work-chip-list">
+              <li>吾輩は猫である</li>
+              <li>坊っちゃん</li>
+              <li>走れメロス</li>
+              <li>人間失格</li>
+              <li>羅生門</li>
+              <li>蜘蛛の糸</li>
+              <li>注文の多い料理店</li>
+              <li>銀河鉄道の夜</li>
+              <li>山月記</li>
+              <li>ごん狐</li>
+              <li>手袋を買いに</li>
+              <li>檸檬</li>
+              <li>刺青</li>
+              <li>瓶詰地獄</li>
+              <li>宮本武蔵</li>
+              <li>三国志</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Bグループ（選集・特例収録・14作家）</h3>
+          <p style="margin-bottom:14px;">
+            代表作・主要作品を中心に収録。与謝野晶子は、源氏物語・みだれ髪・新字新仮名の評論随筆を扱う特例枠です。
+          </p>
+          <ul class="author-list">
+            <li>森鴎外</li>
+            <li>泉鏡花</li>
+            <li>小泉八雲</li>
+            <li>北大路魯山人</li>
+            <li>海野十三</li>
+            <li>寺田寅彦</li>
+            <li>柳田国男</li>
+            <li>三木清</li>
+            <li>島崎藤村</li>
+            <li>小林多喜二</li>
+            <li>国木田独歩</li>
+            <li>有島武郎</li>
+            <li>堀辰雄</li>
+            <li>与謝野晶子</li>
+          </ul>
+          <div class="work-picks">
+            <h4>無料で試しやすい代表作</h4>
+            <ul class="work-chip-list">
+              <li>高瀬舟</li>
+              <li>舞姫</li>
+              <li>高野聖</li>
+              <li>夜行巡査</li>
+              <li>耳無芳一の話</li>
+              <li>雪女</li>
+              <li>遠野物語</li>
+              <li>山の人生</li>
+              <li>天災と国防</li>
+              <li>蟹工船</li>
+              <li>武蔵野</li>
+              <li>一房の葡萄</li>
+              <li>だしの取り方</li>
+              <li>風立ちぬ</li>
+              <li>源氏物語</li>
+              <li>みだれ髪</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 無料でも読める -->
+    <section class="wrap">
+      <h2 class="section-title">無料でも、しっかり読めます</h2>
+      <p class="section-desc">
+        約50作品を無料でしっかり楽しめるようにしています。短編・随筆は全文無料の作品も多く、
+        長編も物語の核心に差し掛かるところまで試せます。
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3>全文無料の名作</h3>
+          <p>
+            『羅生門』『蜘蛛の糸』『走れメロス』『注文の多い料理店』『山月記』
+            『檸檬』『ごん狐』『手袋を買いに』『高瀬舟』『耳なし芳一』
+            『雪女』など、まずは名作をそのまま楽しめます。
+          </p>
+        </div>
+        <div class="card">
+          <h3>長編も途中まで無料</h3>
+          <p>
+            『吾輩は猫である』『坊っちゃん』『人間失格』『銀河鉄道の夜』
+            『風立ちぬ』『蟹工船』などは、物語の核心に差し掛かるところまで無料で試せます。
+          </p>
+        </div>
+        <div class="card">
+          <h3>冒頭の立ち読み＋無料作品の二段構え</h3>
+          <p>
+            全作品で冒頭の立ち読みが可能。さらに選ばれた約50作品は全文または中盤まで無料。
+            まず体験してから、好きな作家や全解放へ進めます。
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:18px;">
+        <div class="card">
+          <h3>無料で試せる作品の例</h3>
+          <p>
+            『羅生門』『走れメロス』『檸檬』『山月記』『注文の多い料理店』
+            『刺青』『瓶詰地獄』『ごん狐』『手袋を買いに』『堕落論』など。
+          </p>
+        </div>
+        <div class="card">
+          <h3>大作も入口からハマれる</h3>
+          <p>
+            『三国志』は「序」を全文無料、『宮本武蔵』は冒頭から世界に入れるなど、
+            大作も入り口から存分に試せます。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 課金設計 -->
+    <section class="wrap" id="pricing">
+      <h2 class="section-title">シンプルな課金設計</h2>
+      <p class="section-desc">
+        いろんな作家を楽しみたい人は全解放へ。好きな作家から入りたい人は作家別パックへ。
+        後から差額でアップグレードもできます。
+      </p>
+
+      <div class="pricing-wrap">
+        <div class="price-box featured">
+          <h3>全作品解放</h3>
+          <div class="price">¥980</div>
+          <div class="price-note">買い切り・31作家・約2000作品・完全オフライン・広告なし・永久有効</div>
+          <ul class="bullet">
+            <li>いろいろな作家を幅広く楽しみたい人向け</li>
+            <li>作家別パックを複数買うよりお得</li>
+            <li>Audibleの月額料金より安く、2000作品が永久に楽しめます</li>
+          </ul>
+        </div>
+
+        <div class="price-box">
+          <h3>作家別パック</h3>
+          <div class="price">¥370</div>
+          <div class="price-note">Aグループ17作家が対象・後から全解放へ差額アップグレード対応</div>
+          <ul class="bullet">
+            <li>漱石パック・太宰パック・芥川パックなど</li>
+            <li>まず好きな作家から入りたい人向け</li>
+            <li>全作品解放へは差額でいつでも移行できます</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 使い始めの流れ -->
+    <section class="wrap">
+      <h2 class="section-title">使い始めの流れ</h2>
+      <div class="flow">
+        <div class="step">
+          <div class="step-no">STEP 1</div>
+          <h4>無料で体験する</h4>
+          <p>無料で試せる作品や立ち読みで、まずはアプリの読み上げと使い心地を試します。</p>
+        </div>
+        <div class="step">
+          <div class="step-no">STEP 2</div>
+          <h4>好きな作家から入る</h4>
+          <p>まずは好きな作家だけ¥370で解放。漱石、太宰、芥川などから始められます。</p>
+        </div>
+        <div class="step">
+          <div class="step-no">STEP 3</div>
+          <h4>他の作家も気になってくる</h4>
+          <p>1人の作家を読み終えると、同じ時代の別の作家や、違うジャンルも試したくなります。</p>
+        </div>
+        <div class="step">
+          <div class="step-no">STEP 4</div>
+          <h4>¥980で全部解放</h4>
+          <p>差額アップグレードで、31作家・約2000作品をまとめて楽しめます。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- アプリ画面 -->
+    <section class="wrap">
+      <h2 class="section-title">アプリ画面</h2>
+      <p class="section-desc">
+        本棚、作品ページ、再生画面。大量収録でも迷わず、名作へすぐ入れる導線を目指しました。
+      </p>
+
+      <div class="screens">
+        <div class="screen-card">
+          <img
+            src="https://placehold.co/520x1000?text=%E6%9C%AC%E6%A3%9A%E7%94%BB%E9%9D%A2"
+            alt="本棚画面"
+          />
+          <p>31作家・約2000作品を一覧できる本棚画面</p>
+        </div>
+        <div class="screen-card">
+          <img
+            src="https://placehold.co/520x1000?text=%E4%BD%9C%E5%93%81%E8%A9%B3%E7%B4%B0"
+            alt="作品詳細画面"
+          />
+          <p>あらすじ・タグ・立ち読み導線を整理した作品ページ</p>
+        </div>
+        <div class="screen-card">
+          <img
+            src="https://placehold.co/520x1000?text=%E5%86%8D%E7%94%9F%E7%94%BB%E9%9D%A2"
+            alt="再生画面"
+          />
+          <p>カラオケ式ハイライトで耳でも目でも追える再生画面</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- シリーズ展開 -->
+    <section class="wrap">
+      <h2 class="section-title">今後のシリーズ展開</h2>
+      <p class="section-desc">
+        聴く文学を母艦として、ジャンル・作品群ごとのシリーズも展開予定です。
+      </p>
+
+      <div class="grid-2">
+        <div class="card strong">
+          <h3> 聴く世界文学</h3>
+          <p>ドストエフスキー・トルストイ・チェーホフ・モーパッサンなど、青空文庫収録の外国文学翻訳を一冊にまとめます。日本語訳で、世界の名作を聴けます。¥980予定。</p>
+        </div>
+        <div class="card strong">
+          <h3>聴く源氏物語</h3>
+          <p>与謝野晶子訳＋谷崎潤一郎訳の2訳聴き比べ。同じ場面を2つの文体で楽しめます。¥980予定。</p>
+        </div>
+        <div class="card">
+          <h3>聴く怪談</h3>
+          <p>小泉八雲・泉鏡花・夢野久作・柳田国男など。秋の夜長に。¥480予定。</p>
+        </div>
+        <div class="card">
+          <h3>聴く時代ミステリー</h3>
+          <p>岡本綺堂の半七捕物帳・江戸川乱歩の探偵小説を中心に。¥480予定。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="wrap">
+      <h2 class="section-title">よくある質問</h2>
+      <div class="faq">
+        <details>
+          <summary>本当に約2000作品入っていますか？</summary>
+          <p>31作家を中心に、約2000作品規模で楽しめる構成を目指しています。作品の種別や作家ごとの収録範囲はアプリ内で分かりやすくご案内します。</p>
+        </details>
+        <details>
+          <summary>無料でどこまで聴けますか？</summary>
+          <p>約50作品を無料でしっかり楽しめるようにしています。短編・随筆は全文無料の作品も多く、長編は物語の核心に差し掛かるところまで試せます。さらに、全作品で冒頭の立ち読みが可能です。</p>
+        </details>
+        <details>
+          <summary>読み間違いはありますか？</summary>
+          <p>本アプリはOS標準の読み上げ機能（TTS）を使用しているため、文脈によって読み方が変わる語句を中心に読み間違いが発生する場合があります。独自システムで最大限対策していますが、完全な正確性は保証できません。あらかじめご了承の上お楽しみください。</p>
+        </details>
+        <details>
+          <summary>月額課金ですか？</summary>
+          <p>いいえ。買い切り型です。全作品解放は¥980、作家別パックは¥370です。一度購入すれば永久にお使いいただけます。</p>
+        </details>
+        <details>
+          <summary>作家別パックから全解放へ移れますか？</summary>
+          <p>はい。後から差額でアップグレードできます。好きな作家から入って、ハマったら全解放へ。</p>
+        </details>
+        <details>
+          <summary>オフラインで使えますか？</summary>
+          <p>はい。インストール後はインターネット接続不要で全作品をお楽しみいただけます。地下鉄・機内・電波のない場所でも問題なく動作します。</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="wrap cta">
+      <h2 class="section-title">31作家・約2000作品を、オフラインで。</h2>
+      <p class="section-desc">
+        まずは無料作品から。気に入ったら、好きな作家だけでも、全部まとめてでも。
+      </p>
+
+      <div class="actions" style="justify-content:center;">
+        <a class="btn primary" href="https://apps.apple.com/" target="_blank" rel="noopener noreferrer">App Storeで見る</a>
+        <a class="btn" href="https://play.google.com/store" target="_blank" rel="noopener noreferrer">Google Playで見る</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      © KB Works
+    </div>
+  </footer>
 </body>
 </html>
