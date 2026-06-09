@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="21600">
-    <title>Nyanko Portal Kindle (我が家専用)</title>
+    <title>Kindle Weather Board</title>
     <style>
         body {
             background-color: #ffffff;
@@ -249,7 +249,7 @@
                     const currentRain = meteoData.current.precipitation;
                     if (currentRain > 0) {
                         // 降水量が0より大きい場合、予報ベースのアドバイスを上書きする
-                        document.getElementById('umbrellaText').innerText = "☔今まさに雨が降っています！傘が必須！";
+                        document.getElementById('umbrellaText').innerText = "今まさに雨が降っています！傘必須！";
                     }
 
                 } catch (e) {
