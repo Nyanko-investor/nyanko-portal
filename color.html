@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>カラーコードコピー表</title>
+  <style>
+    :root {
+      --bg: #f6f3ef;
+      --card: #ffffff;
+      --ink: #25211f;
+      --muted: #6f6760;
+      --line: #e2dbd2;
+      --shadow: 0 10px 26px rgba(37, 33, 31, .08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fffaf5 0%, var(--bg) 100%);
+    }
+    header {
+      padding: 26px 18px 16px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 4vw, 38px);
+      letter-spacing: .03em;
+    }
+    .lead {
+      margin: 0 auto;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .toolbar {
+      width: min(1180px, calc(100% - 26px));
+      margin: 0 auto 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      padding: 10px 0;
+      background: rgba(246, 243, 239, .88);
+      backdrop-filter: blur(10px);
+    }
+    @media (max-width: 700px) {
+      .toolbar { grid-template-columns: 1fr; position: static; }
+    }
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 12px 16px;
+      font: inherit;
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 5px 16px rgba(37, 33, 31, .05);
+    }
+    .mini-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .action {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 11px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    main {
+      width: min(1180px, calc(100% - 26px));
+      margin: 0 auto 42px;
+      display: grid;
+      gap: 16px;
+    }
+    section {
+      background: rgba(255,255,255,.88);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    section h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+      gap: 10px;
+    }
+    .swatch {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 0;
+      overflow: hidden;
+      cursor: pointer;
+      text-align: left;
+      transition: transform .08s ease, box-shadow .08s ease, border-color .08s ease;
+    }
+    .swatch:hover, .swatch:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(37, 33, 31, .13);
+      border-color: #cabeb0;
+      outline: none;
+    }
+    .chip {
+      height: 58px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+    }
+    .body {
+      padding: 8px 9px 9px;
+    }
+    .name {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .hex {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: .02em;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(37,33,31,.94);
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 999px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 10;
+      max-width: calc(100% - 28px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>カラーコードコピー表</h1>
+    <p class="lead">色ボタンを押すと、HEXカラーコードだけをコピーします。ジャンル分類なしで、広めに色を並べた単機能版です。</p>
+  </header>
+
+  <div class="toolbar">
+    <input id="search" placeholder="色名・HEXで検索　例：青 / pink / #FF / 透明感">
+    <div class="mini-actions">
+      <button class="action" id="copyLast">最後にコピーした色</button>
+      <button class="action" id="clearSearch">検索クリア</button>
+    </div>
+  </div>
+
+  <main id="app"></main>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const palettes = [
+      ["白・黒・グレー", [
+        ["白", "#FFFFFF"], ["雪白", "#F8FBFF"], ["オフホワイト", "#F7F2E8"], ["アイボリー", "#FFFFF0"],
+        ["クリーム", "#FFF3D6"], ["薄灰", "#E5E7EB"], ["銀灰", "#C0C7D1"], ["グレー", "#808080"],
+        ["チャコール", "#4B5563"], ["墨色", "#2B2B2B"], ["黒", "#000000"]
+      ]],
+      ["赤系", [
+        ["赤", "#FF0000"], ["朱赤", "#E53935"], ["トマト", "#FF6347"], ["コーラ赤", "#C62828"],
+        ["深紅", "#B00020"], ["ワイン", "#7B1E3A"], ["えんじ", "#8B0000"], ["珊瑚", "#FF6F61"],
+        ["サーモン", "#FA8072"], ["ローズ", "#E91E63"], ["くすみ赤", "#B85C5C"]
+      ]],
+      ["ピンク系", [
+        ["薄ピンク", "#FFD6E7"], ["桜", "#F8BBD0"], ["桃", "#F7A7B8"], ["いちご", "#F06292"],
+        ["コーラルピンク", "#FF7F9E"], ["ローズピンク", "#E75480"], ["マゼンタ", "#FF00FF"],
+        ["濃ピンク", "#D81B60"], ["青みピンク", "#C2185B"], ["くすみピンク", "#C78A95"]
+      ]],
+      ["オレンジ・茶橙系", [
+        ["オレンジ", "#FFA500"], ["みかん", "#FFB347"], ["柿色", "#F28C28"], ["にんじん", "#ED9121"],
+        ["アプリコット", "#FBC08D"], ["コーラル", "#FF7F50"], ["琥珀", "#C47F2A"], ["キャラメル", "#C68642"],
+        ["テラコッタ", "#C65D3A"], ["銅", "#B87333"]
+      ]],
+      ["黄色・金系", [
+        ["黄色", "#FFFF00"], ["レモン", "#FFF44F"], ["淡黄", "#FFF7A8"], ["バナナ", "#FFE135"],
+        ["ひまわり", "#FFC107"], ["山吹", "#F8B500"], ["金", "#D4AF37"], ["クリーム黄", "#FFF0B3"],
+        ["からし", "#D6A000"], ["くすみ黄", "#C9B458"]
+      ]],
+      ["緑系", [
+        ["黄緑", "#A8E063"], ["若葉", "#7BC96F"], ["ライム", "#32CD32"], ["ミント", "#98FFCC"],
+        ["エメラルド", "#2ECC71"], ["緑", "#00A86B"], ["抹茶", "#8FAF5F"], ["深緑", "#006B3C"],
+        ["森", "#2E7D32"], ["オリーブ", "#808000"], ["くすみ緑", "#7A9B76"]
+      ]],
+      ["青緑・水色系", [
+        ["水色", "#87CEEB"], ["淡水色", "#BDEBFF"], ["氷水色", "#DDF4FF"], ["アクア", "#00FFFF"],
+        ["ターコイズ", "#40E0D0"], ["青緑", "#00A6A6"], ["ティール", "#008080"], ["ラムネ", "#5BC0EB"],
+        ["透明ブルー", "#6ECFF6"], ["くすみ水色", "#8AB9C9"]
+      ]],
+      ["青系", [
+        ["青", "#0000FF"], ["空色", "#4FC3F7"], ["スポドリ青", "#2196F3"], ["シアンブルー", "#00AEEF"],
+        ["ロイヤルブルー", "#4169E1"], ["群青", "#1E3A8A"], ["紺", "#000080"], ["ネイビー", "#0B1F3A"],
+        ["デニム", "#356CA5"], ["くすみ青", "#5F7FA3"]
+      ]],
+      ["紫系", [
+        ["ラベンダー", "#C8A2C8"], ["藤色", "#B39DDB"], ["薄紫", "#D8B4FE"], ["紫", "#800080"],
+        ["ぶどう", "#7E4EB8"], ["すみれ", "#7C4DFF"], ["青紫", "#5E35B1"], ["赤紫", "#9C27B0"],
+        ["プラム", "#6A1B9A"], ["くすみ紫", "#8E7AA8"]
+      ]],
+      ["茶色・ベージュ系", [
+        ["ベージュ", "#F5F5DC"], ["生成り", "#F4E8D0"], ["砂色", "#D6C6A8"], ["麦色", "#D8A75F"],
+        ["ミルクティー", "#D9B58C"], ["カフェオレ", "#B88963"], ["茶", "#8B4513"], ["コーヒー", "#4A2C24"],
+        ["チョコ", "#5C3424"], ["焦げ茶", "#3B2417"], ["くすみ茶", "#8A6F5A"]
+      ]],
+      ["パステル", [
+        ["パステル赤", "#FFB3B3"], ["パステル桃", "#FFC6D9"], ["パステル橙", "#FFD1A3"],
+        ["パステル黄", "#FFF6A5"], ["パステル緑", "#C8F7C5"], ["パステル水", "#BDEFFF"],
+        ["パステル青", "#B8D4FF"], ["パステル紫", "#D9C2FF"], ["パステル茶", "#E6D3C2"]
+      ]],
+      ["ビビッド", [
+        ["ビビッド赤", "#FF1744"], ["ビビッド桃", "#FF1493"], ["ビビッド橙", "#FF6D00"],
+        ["ビビッド黄", "#FFEA00"], ["ビビッド緑", "#00E676"], ["ビビッド水", "#00E5FF"],
+        ["ビビッド青", "#2979FF"], ["ビビッド紫", "#D500F9"], ["蛍光緑", "#A6FF4D"]
+      ]],
+      ["ダーク・深色", [
+        ["ダーク赤", "#7F1D1D"], ["ダーク橙", "#7C2D12"], ["ダーク黄土", "#713F12"],
+        ["ダーク緑", "#14532D"], ["ダーク青緑", "#134E4A"], ["ダーク青", "#1E3A8A"],
+        ["ダーク紫", "#4C1D95"], ["ダーク茶", "#3A241A"], ["ダークグレー", "#1F2937"]
+      ]]
+    ];
+
+    let lastCopied = "";
+
+    const app = document.getElementById("app");
+    const toast = document.getElementById("toast");
+    const search = document.getElementById("search");
+
+    function render() {
+      app.innerHTML = "";
+      const q = search.value.trim().toLowerCase();
+
+      palettes.forEach(([title, colors]) => {
+        const filtered = colors.filter(([name, hex]) => {
+          const hay = `${name} ${hex}`.toLowerCase();
+          return !q || hay.includes(q);
+        });
+        if (!filtered.length) return;
+
+        const section = document.createElement("section");
+        const h2 = document.createElement("h2");
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const grid = document.createElement("div");
+        grid.className = "grid";
+
+        filtered.forEach(([name, hex]) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "swatch";
+          btn.setAttribute("aria-label", `${name} ${hex}をコピー`);
+          btn.innerHTML = `
+            <div class="chip" style="background:${hex}"></div>
+            <div class="body">
+              <span class="name">${escapeHtml(name)}</span>
+              <span class="hex">${escapeHtml(hex)}</span>
+            </div>
+          `;
+          btn.addEventListener("click", () => copyHex(hex, name));
+          grid.appendChild(btn);
+        });
+
+        section.appendChild(grid);
+        app.appendChild(section);
+      });
+
+      if (!app.innerHTML) {
+        const section = document.createElement("section");
+        section.innerHTML = "<h2>該当する色がありません</h2>";
+        app.appendChild(section);
+      }
+    }
+
+    function copyHex(hex, name) {
+      lastCopied = hex;
+      copyText(hex);
+      showToast(`${name} ${hex} をコピーしました`);
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.left = "-9999px";
+      document.body.appendChild(area);
+      area.focus();
+      area.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(area);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    search.addEventListener("input", render);
+    document.getElementById("clearSearch").addEventListener("click", () => {
+      search.value = "";
+      render();
+      search.focus();
+    });
+    document.getElementById("copyLast").addEventListener("click", () => {
+      if (!lastCopied) {
+        showToast("まだコピーした色がありません");
+        return;
+      }
+      copyText(lastCopied);
+      showToast(`${lastCopied} をコピーしました`);
+    });
+
+    render();
+  </script>
+</body>
+</html>
