@@ -1,90 +1,348 @@
-CONFIDENTIAL DOCUMENT
-ニャンコ・ホールディングス
-グランド・マスタープラン 2026
-〜 ニャンコ式投資法のすべて 〜
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>真正・投資戦略 ＆ QUEST TO GOD</title>
+    <style>
+        :root {
+            --nyanko-navy: #1a253a;
+            --nyanko-blue: #2c5282;
+            --nyanko-gold: #c05621;
+            --nyanko-red: #e53e3e;
+            --nyanko-gray: #f7fafc;
+            --text-main: #2d3748;
+            --border-color: #e2e8f0;
+            --header-bg: #1a253a;
+            --tech-cyan: #1de9b6;
+        }
 
-💻
-ポータルへ
-🏠
-理念・税金
-📈
-投資
-📅
-ロードマップ
-🔥
-裏マニュアル
-第5章：【攻撃】NASDAQ100と投資戦略
-■ 投資対象： NASDAQ100 (特定口座:1545 / NISA:NDX投資信託)
-■ 基本比率： 株 60% : 待機資金 40% を死守
-■ 戦略： ガチホ ＆ 暴落時ナンピン
-1. 📉 ナンピン買い注文ルールの計算式
-注文ルールの計算式（絶対遵守・分割後仕様）
-1545の注文口数 ＝ ( N － 1 ) × ベース口数
-📌 変数「N」の定義：
-最高値からの下落率（％）の「整数部分」。
-例： -3.5% ➡ N=3 ／ -15.9% ➡ N=15
+        * { box-sizing: border-box; }
 
-📌 変数「ベース口数」の定義（Quest to God 連動）：
-現在の総資産規模（億の位）に応じて、発注の基礎となる口数を自動決定する。
-資産規模	ベース口数	備考
-〜1.9 億円	200 口	NOW Lv.43（等倍迎撃）
-2 億円台	400 口	（旧×2倍）
-3 億円台	600 口	（旧×3倍）
-5 億円台	1,000 口	（旧×5倍）
-10 億円〜	2,000 口	（旧×10倍）
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.8;
+            color: var(--text-main);
+            background-color: #edf2f7;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+        }
 
-🛡️ 安全装置 (Safety Valve)
-暴落時に待機資金を使い果たさないためのブレーキ。この計算式の比率を超えて買ってはいけません。
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 50px;
+        }
 
-安全限界ライン ＝ 60 × 1 ÷ ( 1 － 下落率 )
-🚨 非常事態（暴落時）への移行
-下落率が -20% を超える、または待機資金が枯渇した場合は
-平時のルールを完全に破棄し、外部資金を投入する。
-🔥 【裏マニュアル】総力戦プロトコルへ
-2. 待機資金の定義
-資金	定義・運用ルール
-待機資金	銀行口座の現金 ＋ 証券口座の現金 − 生活防衛資金300万円。
-リバランス・ナンピンに使う資金として管理する。生活防衛資金300万円は、投資比率の計算に含めない。
-3. 毎月のサイクル
-📘 ニャンコ式・統合運用マニュアル
-🗓️ 毎月25日：【給料日】
-給料着金・支払い
-カード等の支払いをすべて完了させる。
-🔻
-（この期間は「スナイパー」になる）
-🔻
-🗓️ 26日〜翌14日：【日常業務】
-（狙撃の日々）
-観測
-1日1回、株価とアプリをチェックする。
-執行（ナンピン）
-下落率に応じて「ナンピン買い」を行う。
-安全装置
-ただし、アプリが示す「安全限界ライン（ナンピン許容株比率）」を超えては買わない。
-🔻
-（ここで一度、規律を正す）
-🔻
-🗓️ 毎月15日：【聖なるリバランス日】
-（比率調整の日）
-待機資金の確認
-銀行口座と証券口座の現金を合算し、生活防衛資金300万円を差し引いて待機資金を確認する。口座間の資金移動によって待機資金の合計は変わらない。
-60%復帰（最優先）
-株と待機資金の合計に対する株の比率を計算し、「60%」ジャストに戻す分だけまとめて買う。
-休戦協定
-リバランスをした日は「ナンピン買い」はお休みとする。
-（60%に戻すだけで十分仕事をしたため）
-⚡ 特別作戦：年末年始「損出し＆NISA移管」リレー
-❶ 12月 (損出し)
-目的： 特定口座の含み損を確定させ、税金を取り戻す。
-Action： 保有中の「1545」を売却し、即座に「2631（MAXISナスダック100）」を買う。
-▼
-❷ 1月 (NISA移管)
-目的： 特定口座（課税）から新NISA（非課税）へ資金を移す。
-Action： 手元現金でNISA投信を発注。同日に特定口座の2631を売却。ノーポジション時間をゼロにする。
-4. 鉄の掟 (Iron Rules)
-■ ショート(空売り)禁止
-無限のリスクを負わない。
-■ 狼狽売り禁止
-暴落はバーゲンセール。「歴史的高値」はいずれ更新されると信じる。
-合言葉：「下がったらバーゲン、上がったら資産増」
-© 2026 Nyanko Holdings. All Rights Reserved.
+        /* ヘッダー */
+        header {
+            background: var(--header-bg);
+            color: #fff;
+            padding: 50px 20px 40px;
+            text-align: center;
+        }
+
+        .confidential {
+            font-size: 0.85rem;
+            letter-spacing: 0.3em;
+            opacity: 0.8;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .header-main-title {
+            font-size: 1.8rem;
+            margin: 0;
+            line-height: 1.4;
+            font-weight: bold;
+        }
+
+        .header-sub-title {
+            font-size: 1rem;
+            margin-top: 20px;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+        /* ナビゲーション */
+        nav {
+            background: var(--header-bg);
+            padding: 15px 10px;
+            border-top: 4px solid var(--nyanko-gold);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            background: #2d3748;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .nav-btn span { margin-right: 6px; }
+        .nav-btn.active { background: var(--nyanko-gold); }
+        .nav-btn.alert { background: var(--nyanko-red); box-shadow: 0 0 10px rgba(229,62,62,0.5); }
+
+        /* コンテンツエリア */
+        main { padding: 40px 50px; }
+        h2 { color: var(--nyanko-navy); border-bottom: 2px solid var(--nyanko-blue); padding-bottom: 10px; margin-top: 50px; font-size: 1.6rem; letter-spacing: 0.05em; }
+        h3 { color: var(--nyanko-blue); border-left: 5px solid var(--nyanko-gold); padding-left: 15px; margin-top: 40px; font-size: 1.3rem; }
+        
+        .box { background: var(--nyanko-gray); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        strong { color: var(--nyanko-navy); background: linear-gradient(transparent 70%, #bee3f8 70%); }
+
+        /* 合言葉ボックス */
+        .motto-box { background: #08162b; color: #ffeb3b; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 1.2rem; margin: 30px 0; border: 2px solid var(--nyanko-gold); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        /* アルゴリズム・計算式 */
+        .algo-box { background-color: #f0fff4; border: 3px solid #38a169; border-radius: 12px; padding: 25px; margin: 30px 0; }
+        .algo-title { color: #2f855a; font-weight: 900; font-size: 1.2em; border-bottom: 2px dashed #2f855a; padding-bottom: 10px; margin-bottom: 20px; display: block; text-align: center; }
+        .algo-formula { font-family: "Courier New", monospace; font-size: 1.5rem; background: #fff; padding: 15px; border-radius: 6px; text-align: center; margin: 15px 0; font-weight: bold; color: #2d3748; border: 1px solid #cbd5e0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* 倍率テーブル */
+        .multiplier-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 8px; overflow: hidden; }
+        .multiplier-table th, .multiplier-table td { border: 1px solid #eee; padding: 12px; text-align: center; font-size: 0.9rem; }
+        .multiplier-table th { background: #f1f5f9; color: var(--nyanko-blue); font-weight: bold; }
+
+        /* 安全装置 */
+        .stop-box { border: 2px solid var(--nyanko-red); background: #fff5f5; padding: 25px; border-radius: 12px; text-align: center; font-weight: bold; margin-top: 25px; color: var(--nyanko-red); }
+
+        /* 🗓️ 毎月のサイクル（マニュアルデザイン） */
+        .cycle-box { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 6px solid var(--nyanko-blue); padding: 25px; margin: 25px 0; border-radius: 0 12px 12px 0; }
+        .cycle-box h1 { font-size: 1.4rem; color: var(--nyanko-navy); border-bottom: 3px double var(--nyanko-gold); padding-bottom: 10px; text-align: center; margin-bottom: 20px; margin-top: 0; }
+        .cycle-box h2 { font-size: 1.2rem; background: #e2e8f0; padding: 10px; border-radius: 6px; margin-top: 30px; color: var(--nyanko-navy); border-left: 5px solid var(--nyanko-blue); border-bottom: none; }
+        .cycle-box h3 { font-size: 1.0rem; color: var(--nyanko-blue); margin-top: 20px; border-bottom: 1px dashed #cbd5e0; display: inline-block; border-left: none; padding-left: 0; }
+        
+        .arrow-box { text-align: center; margin: 25px 0; }
+        .arrow { font-size: 1.2rem; display: block; color: var(--nyanko-gold); line-height: 1; }
+        .note { font-size: 0.85rem; color: #718096; display: block; margin-top: 5px; }
+
+        /* ⚖️ 鉄の掟 */
+        .iron-rules { background: #fffaf0; border: 2px solid var(--nyanko-gold); border-radius: 12px; padding: 25px; margin: 30px 0; }
+        .rule-item { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .rule-label { color: var(--nyanko-gold); font-weight: bold; display: block; margin-bottom: 5px; font-size: 1.1rem; }
+
+        /* ⚡ 特別作戦（リレーデザイン） */
+        .tactical-box { background-color: #fff; border: 2px solid #ed8936; padding: 25px; border-radius: 12px; margin: 40px 0; box-shadow: 0 4px 12px rgba(237, 137, 54, 0.1); }
+        .tactical-title { color: #c05621; font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 25px; text-align: center; border-bottom: 2px solid #ed8936; padding-bottom: 10px; }
+        .tactical-step { background: #fffaf0; padding: 20px; border-radius: 10px; margin-bottom: 15px; position: relative; border-left: 5px solid #ed8936; }
+        .tactical-step:last-child { margin-bottom: 0; }
+        .step-label { font-weight: 900; color: #c05621; display: block; margin-bottom: 8px; font-size: 1.1rem; }
+        .step-relay-arrow { text-align: center; color: #ed8936; font-size: 1.5rem; margin: 5px 0; line-height: 1; }
+
+        /* テーブル一般 */
+        .standard-table { width: 100%; border-collapse: collapse; margin: 25px 0; }
+        .standard-table th, .standard-table td { border: 1px solid var(--border-color); padding: 15px; text-align: left; vertical-align: middle; }
+        .standard-table th { background-color: var(--nyanko-navy); color: #fff; font-weight: bold; font-size: 0.9rem; }
+        tr:nth-child(even) { background-color: #fafbfc; }
+
+        footer { text-align: center; padding: 50px 20px; background: var(--nyanko-navy); color: #fff; border-top: 6px solid var(--nyanko-gold); }
+
+        ul, ol { padding-left: 25px; margin: 15px 0; }
+        li { margin-bottom: 12px; }
+
+        @media (max-width: 600px) {
+            main { padding: 30px 20px; }
+            .header-main-title { font-size: 1.4rem; }
+            .nav-btn { width: 47%; justify-content: center; font-size: 0.75rem; padding: 10px 5px; }
+            .algo-formula { font-size: 1.1rem; }
+            .motto-box { font-size: 1rem; }
+            .standard-table th, .standard-table td { display: block; width: 100%; border-bottom: none; }
+            .standard-table td:last-child { border-bottom: 1px solid var(--border-color); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="confidential">CONFIDENTIAL DOCUMENT</span>
+            <div class="header-main-title">
+                ニャンコ・ホールディングス<br>グランド・マスタープラン 2026
+            </div>
+            <p class="header-sub-title">〜 ニャンコ式投資法のすべて 〜</p>
+        </header>
+
+        <nav>
+            <a href="index.html" class="nav-btn"><span>💻</span>ポータルへ</a>
+            <a href="philosophy.html" class="nav-btn"><span>🏠</span>理念・税金</a>
+            <a href="invest.html" class="nav-btn active"><span>📈</span>投資</a>
+            <a href="roadmap.html" class="nav-btn"><span>📅</span>ロードマップ</a>
+            <a href="secret.html" class="nav-btn alert"><span>🔥</span>裏マニュアル</a>
+        </nav>
+
+        <main>
+            <section>
+                <h2>第5章：【攻撃】NASDAQ100と投資戦略</h2>
+                <div class="box" style="border-left: 6px solid var(--nyanko-blue);">
+                    ■ <strong>投資対象：</strong> NASDAQ100 (特定口座:1545 / NISA:NDX投資信託)<br>
+                    ■ <strong>基本比率：</strong> <strong>株 60% : 待機資金 40%</strong> を死守<br>
+                    ■ <strong>戦略：</strong> ガチホ ＆ 暴落時ナンピン
+                </div>
+
+                <h3>1. 📉 ナンピン買い注文ルールの計算式</h3>
+                <div class="algo-box">
+                    <span class="algo-title">注文ルールの計算式（絶対遵守・分割後仕様）</span>
+                    <div class="algo-formula">
+                        1545の注文口数 ＝ ( N － 1 ) × <span style="color:var(--nyanko-blue)">ベース口数</span>
+                    </div>
+                    <div class="algo-desc">
+                        <strong>📌 変数「N」の定義：</strong><br>
+                        最高値からの下落率（％）の<strong>「整数部分」</strong>。<br>
+                        <em>例： -3.5% ➡ N=3 ／ -15.9% ➡ N=15</em>
+                    </div>
+                    <br>
+                    <div class="algo-desc">
+                        <strong>📌 変数「ベース口数」の定義（Quest to God 連動）：</strong><br>
+                        現在の総資産規模（億の位）に応じて、発注の基礎となる口数を自動決定する。<br>
+                        <table class="multiplier-table">
+                            <tr><th>資産規模</th><th>ベース口数</th><th>備考</th></tr>
+                            <tr><td>〜1.9 億円</td><td><strong>200 口</strong></td><td><strong>NOW Lv.43（等倍迎撃）</strong></td></tr>
+                            <tr><td>2 億円台</td><td><strong>400 口</strong></td><td>（旧×2倍）</td></tr>
+                            <tr><td>3 億円台</td><td><strong>600 口</strong></td><td>（旧×3倍）</td></tr>
+                            <tr><td>5 億円台</td><td><strong>1,000 口</strong></td><td>（旧×5倍）</td></tr>
+                            <tr><td>10 億円〜</td><td style="color:var(--nyanko-gold);"><strong>2,000 口</strong></td><td>（旧×10倍）</td></tr>
+                        </table>
+                    </div>
+                    <br>
+                    <div class="safety-box">
+                        <span style="color:#c53030; font-weight:bold; display:flex; align-items:center; margin-bottom:10px;">🛡️ 安全装置 (Safety Valve)</span>
+                        <p style="margin:5px 0 15px 0; font-size:0.95em; color:#4a5568;">
+                            暴落時に待機資金を使い果たさないためのブレーキ。この計算式の比率を超えて買ってはいけません。
+                        </p>
+                        <div style="font-weight:bold; font-family:'Courier New', monospace; text-align:center; font-size:1.1rem; background:#fff; padding:15px; border-radius:6px; border: 1px solid #ddd; margin-bottom:20px;">
+                            安全限界ライン ＝ 60 × 1 ÷ ( 1 － 下落率 )
+                        </div>
+                        <div style="border-top:1px dashed #e53e3e; padding-top:15px; background: #fff5f5; padding: 20px; border-radius: 8px; margin-top: 15px; text-align: center;">
+                            <span style="color:#c53030; font-weight:bold; font-size:1.2rem; display: block; margin-bottom: 10px;">🚨 非常事態（暴落時）への移行</span>
+                            <span style="font-size:0.95em; line-height:1.7; display:block; color: #4a5568;">
+                                下落率が <strong>-20%</strong> を超える、または待機資金が枯渇した場合は<br>平時のルールを完全に破棄し、外部資金を投入する。<br>
+                                <a href="secret.html" style="color:var(--nyanko-red); font-size:1.1rem; font-weight:bold; border:2px solid var(--nyanko-red); padding:8px 20px; display:inline-block; margin-top:15px; text-decoration:none; border-radius:6px; background:#fff; transition: 0.2s;">🔥 【裏マニュアル】総力戦プロトコルへ</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>2. 待機資金の定義</h3>
+                <table class="standard-table">
+                    <thead>
+                        <tr><th>資金</th><th>定義・運用ルール</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>待機資金</strong></td><td><strong>銀行口座の現金 ＋ 証券口座の現金 − 生活防衛資金300万円</strong>。<br>リバランス・ナンピンに使う資金として管理する。生活防衛資金300万円は、投資比率の計算に含めない。</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>3. 毎月のサイクル</h3>
+                <div class="cycle-box">
+                    <h1>📘 ニャンコ式・統合運用マニュアル</h1>
+
+                    <h2>🗓️ 毎月25日：【給料日】</h2>
+                    
+                    <h3>給料着金・支払い</h3>
+                    <ul>
+                        <li>カード等の支払いをすべて完了させる。</li>
+                    </ul>
+
+                    <div class="arrow-box">
+                        <span class="arrow">🔻</span>
+                        <span class="note">（この期間は「スナイパー」になる）</span>
+                        <span class="arrow">🔻</span>
+                    </div>
+
+                    <h2>🗓️ 26日〜翌14日：【日常業務】<br><span style="font-size:0.8em; font-weight:normal;">（狙撃の日々）</span></h2>
+
+                    <h3>観測</h3>
+                    <ul>
+                        <li>1日1回、株価とアプリをチェックする。</li>
+                    </ul>
+
+                    <h3>執行（ナンピン）</h3>
+                    <ul>
+                        <li>下落率に応じて「ナンピン買い」を行う。</li>
+                    </ul>
+
+                    <h3>安全装置</h3>
+                    <ul>
+                        <li>ただし、アプリが示す<strong>「安全限界ライン（ナンピン許容株比率）」を超えては買わない。</strong></li>
+                    </ul>
+
+                    <div class="arrow-box">
+                        <span class="arrow">🔻</span>
+                        <span class="note">（ここで一度、規律を正す）</span>
+                        <span class="arrow">🔻</span>
+                    </div>
+
+                    <h2>🗓️ 毎月15日：【聖なるリバランス日】<br><span style="font-size:0.8em; font-weight:normal;">（比率調整の日）</span></h2>
+
+                    <h3>待機資金の確認</h3>
+                    <ul>
+                        <li>銀行口座と証券口座の現金を合算し、生活防衛資金300万円を差し引いて待機資金を確認する。口座間の資金移動によって待機資金の合計は変わらない。</li>
+                    </ul>
+
+                    <h3>60%復帰（最優先）</h3>
+                    <ul>
+                        <li>株と待機資金の合計に対する株の比率を計算し、<strong>「60%」ジャストに戻す分だけまとめて買う。</strong></li>
+                    </ul>
+
+                    <h3>休戦協定</h3>
+                    <ul>
+                        <li>リバランスをした日は<strong>「ナンピン買い」はお休み</strong>とする。<br><span class="note">（60%に戻すだけで十分仕事をしたため）</span></li>
+                    </ul>
+                </div>
+
+                <div class="tactical-box">
+                    <span class="tactical-title">⚡ 特別作戦：年末年始「損出し＆NISA移管」リレー</span>
+                    
+                    <div class="tactical-step">
+                        <span class="step-label">❶ 12月 (損出し)</span>
+                        <div><strong>目的：</strong> 特定口座の含み損を確定させ、税金を取り戻す。<br><strong>Action：</strong> 保有中の「1545」を売却し、即座に<strong>「2631（MAXISナスダック100）」</strong>を買う。</div>
+                    </div>
+
+                    <div class="step-relay-arrow">▼</div>
+
+                    <div class="tactical-step">
+                        <span class="step-label">❷ 1月 (NISA移管)</span>
+                        <div><strong>目的：</strong> 特定口座（課税）から新NISA（非課税）へ資金を移す。<br><strong>Action：</strong> 手元現金でNISA投信を発注。同日に特定口座の2631を売却。ノーポジション時間をゼロにする。</div>
+                    </div>
+                </div>
+
+                <h3>4. 鉄の掟 (Iron Rules)</h3>
+                <div class="iron-rules">
+                    <div class="rule-item">
+                        <span class="rule-label">■ ショート(空売り)禁止</span>
+                        無限のリスクを負わない。
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-label">■ 狼狽売り禁止</span>
+                        暴落はバーゲンセール。「歴史的高値」はいずれ更新されると信じる。
+                    </div>
+                </div>
+
+                <div class="motto-box">
+                    合言葉：「下がったらバーゲン、上がったら資産増」
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Nyanko Holdings. All Rights Reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
